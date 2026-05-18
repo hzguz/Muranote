@@ -212,7 +212,3 @@ For the existing deployment notes, see [docs/deploy-vercel-firebase.md](./docs/d
 ## Known Operational Caveat
 
 `scripts/checkTrackedSecrets.mjs` currently self-matches one of its own detection patterns, which can create a false positive when running `npm run security:secrets`. Treat that script result carefully until the scanner exclusion logic is adjusted.
-
-## Maintenance Reset
-
-If you need to wipe repository history and old deployments after an accidental secret exposure, use the playbook in [docs/reset-history-and-deployments.md](./docs/reset-history-and-deployments.md).
