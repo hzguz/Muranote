@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+  <title>muranote</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="icon" type="image/webp" href="/Favicon.webp">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+
+  <style>
+    /* CSS Custom Properties for Theming */
+    :root {
+      --bg-primary: #f8f6f2;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f3f4f6;
+      --text-primary: #1f2937;
+      --text-secondary: #4b5563;
+      --text-muted: #9ca3af;
+      --border-color: rgba(0, 0, 0, 0.1);
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --accent-primary: #3d3d3d;
+      --accent-primary-dark: #2d2d2d;
+      --group-bg: rgba(0, 0, 0, 0.04);
+      --group-border: rgba(0, 0, 0, 0.06);
+      --scrollbar-thumb: rgba(61, 61, 61, 0.2);
+      --scrollbar-thumb-hover: rgba(61, 61, 61, 0.5);
+      --modal-overlay: rgba(0, 0, 0, 0.5);
+      --header-bg: #3d3d3d;
+    }
+
+    body {
+      font-family: "Manrope", sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      overflow-x: hidden;
+    }
+
+    html {
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+      margin: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--scrollbar-thumb);
+      border-radius: 99px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+      transition: background-color 0.2s;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: var(--scrollbar-thumb-hover);
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) transparent;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* NOTE GROUP STYLES */
+    .note-group {
+      margin: 4px 0;
+      padding: 4px;
+      border-radius: 18px;
+      background: var(--group-bg);
+      border: 1px solid var(--group-border);
+      transition: background 0.3s ease, border 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      display: block;
+    }
+
+    .note-group-header {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 10px 8px 8px;
+      cursor: default;
+      user-select: none;
+    }
+
+    /* Drag handle for the group */
+    .note-group-drag-handle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      cursor: grab;
+      opacity: 0.3;
+      transition: opacity 0.15s ease;
+      flex-shrink: 0;
+      margin-right: 4px;
+    }
+
+    .note-group-drag-handle:hover {
+      opacity: 0.7;
+    }
+
+    .note-group-drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .note-group-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    .note-group-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      transition: background 0.2s ease, opacity 0.2s ease, transform 0.2s ease, width 0.3s ease, color 0.2s ease;
+      border-radius: 8px;
+      color: inherit;
+      opacity: 0.4;
+      overflow: hidden;
+    }
+
+    .note-group-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+      opacity: 1;
+    }
+
+    .note-group-delete:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .note-group-delete.confirming {
+      width: auto;
+      padding: 0 10px;
+      background: #ef4444;
+      color: white;
+      opacity: 1;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+
+    .note-group-toggle svg {
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: rotate(0deg);
+    }
+
+    .note-group:not(.collapsed) .note-group-toggle svg {
+      transform: rotate(180deg);
+    }
+
+    /* Ícone de edição do título */
+    .note-group-edit-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      cursor: pointer;
+      margin-left: 6px;
+      padding: 4px;
+      border-radius: 6px;
+      transition: opacity 0.15s ease, background 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .note-group:hover .note-group-edit-icon {
+      opacity: 0.4;
+    }
+
+    .note-group-edit-icon:hover {
+      opacity: 1 !important;
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    .note-group-title {
+      font-weight: 800;
+      font-size: 14px;
+      text-transform: lowercase !important;
+      opacity: 0.6;
+      flex-grow: 1;
+      outline: none;
+      letter-spacing: 0.02em;
+      margin-right: 8px;
+      text-align: left;
+      line-height: 1.2;
+      border: none;
+      /* Single line only */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      /* Editable indicator - background on hover */
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: transparent;
+      transition: opacity 0.15s ease, background 0.15s ease;
+      cursor: default;
+    }
+
+    .note-group-title:hover {
+      background: rgba(0, 0, 0, 0.06);
+      opacity: 0.8;
+    }
+
+    .note-group-title[contenteditable="true"] {
+      opacity: 1;
+      cursor: text;
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    /* Drop indicator line */
+    .note-group-drop-indicator {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: var(--accent-primary);
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 50;
+      transition: top 0.1s ease-out, opacity 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .note-group-drop-indicator::before,
+    .note-group-drop-indicator::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent-primary);
+    }
+
+    .note-group-drop-indicator::before {
+      left: 0;
+    }
+
+    .note-group-drop-indicator::after {
+      right: 0;
+    }
+
+
+    /* Wrapper para animação suave com CSS Grid */
+    .note-group-body {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.2s ease-out;
+    }
+
+    .note-group.collapsed .note-group-body {
+      grid-template-rows: 0fr;
+    }
+
+    .note-group-content {
+      padding: 4px 12px 12px 12px;
+      opacity: 1;
+      outline: none;
+      font-size: 15px;
+      line-height: 1.6;
+      overflow: hidden;
+      min-height: 0;
+      transition: opacity 0.15s ease-out, padding 0.2s ease-out;
+    }
+
+    .note-group.collapsed .note-group-content {
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      pointer-events: none;
+    }
+
+    @media (min-width: 768px) {
+      .note-group-content {
+        font-size: 1.05rem;
+      }
+    }
+
+    .note-group.collapsed {
+      background: var(--group-bg);
+    }
+
+    /* Dark mode specific overrides */
+    html.dark .note-group-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    html.dark .note-group-delete:hover {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    /* Drag state for groups */
+    .note-group.dragging {
+      opacity: 0.5;
+      border-style: dashed;
+      border-color: currentColor;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3d3d3d',
+            'primary-dark': '#2d2d2d',
+          },
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "framer-motion": "https://esm.sh/framer-motion@^12.23.26",
+    "uuid": "https://esm.sh/uuid@^13.0.0",
+    "tabler-icons-react": "https://esm.sh/tabler-icons-react@^1.56.0",
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+    "firebase/": "https://esm.sh/firebase@^12.6.0/"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>
