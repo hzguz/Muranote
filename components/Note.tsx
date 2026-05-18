@@ -24,6 +24,7 @@ interface NoteProps {
   layoutId?: string;
   readOnly?: boolean;
   lang: Language;
+  canvasScale?: number;
 }
 
 const IconMap: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number; fill?: string; color?: string }>> = {
@@ -59,7 +60,8 @@ const Note: React.FC<NoteProps> = ({
   stroke,
   layoutId,
   readOnly = false,
-  lang = 'en'
+  lang = 'en',
+  canvasScale = 1
 }) => {
   // Fallback seguro se a cor não existir (ex: notas antigas 'white')
   const { bg, dark, text } = resolveNoteColors(note.color);
@@ -67,6 +69,7 @@ const Note: React.FC<NoteProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const clickStartRef = useRef<{ x: number; y: number } | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const dragStartRef = useRef<{ pointerX: number; pointerY: number; x: number; y: number } | null>(null);
 
   const lastColCheckTime = useRef(0);
   const x = useMotionValue(note.x);
@@ -102,6 +105,17 @@ const Note: React.FC<NoteProps> = ({
         clientY = event.clientY;
       }
       dragOffsetRef.current = { x: clientX - rect.left, y: clientY - rect.top };
+      const dragFromScaledColumn = isGridMode && canvasScale !== 1;
+      if (dragFromScaledColumn) {
+        x.set(0);
+        y.set(0);
+      }
+      dragStartRef.current = {
+        pointerX: clientX,
+        pointerY: clientY,
+        x: dragFromScaledColumn ? 0 : x.get(),
+        y: dragFromScaledColumn ? 0 : y.get(),
+      };
     }
 
     if (onDragStart) onDragStart();
@@ -121,6 +135,12 @@ const Note: React.FC<NoteProps> = ({
     } else if ('clientX' in event) {
       clientX = event.clientX;
       clientY = event.clientY;
+    }
+
+    if ((!isGridMode || canvasScale !== 1) && dragStartRef.current) {
+      const scale = Math.max(canvasScale, 0.001);
+      x.set(dragStartRef.current.x + (clientX - dragStartRef.current.pointerX) / scale);
+      y.set(dragStartRef.current.y + (clientY - dragStartRef.current.pointerY) / scale);
     }
 
     // Auto-scroll no mobile quando arrastando perto das bordas
@@ -183,6 +203,12 @@ const Note: React.FC<NoteProps> = ({
 
     // Se onGridDrop está disponível, usar para lógica unificada
     // Caso contrário, usar onUpdatePosition diretamente com motion values
+    if ((!isGridMode || canvasScale !== 1) && dragStartRef.current) {
+      const scale = Math.max(canvasScale, 0.001);
+      x.set(dragStartRef.current.x + (clientX - dragStartRef.current.pointerX) / scale);
+      y.set(dragStartRef.current.y + (clientY - dragStartRef.current.pointerY) / scale);
+    }
+
     if (onGridDrop) {
       // onGridDrop recebe screen coordinates, final motion values e offset do arraste
       onGridDrop(note.id, { x: clientX, y: clientY }, { x: x.get(), y: y.get() }, dragOffsetRef.current);
@@ -192,6 +218,11 @@ const Note: React.FC<NoteProps> = ({
     }
 
     setIsDragging(false);
+    if (isGridMode && canvasScale !== 1) {
+      x.set(0);
+      y.set(0);
+    }
+    dragStartRef.current = null;
     if (onDragEnd) onDragEnd();
     if (onDragOverColumn) onDragOverColumn(null);
   };
@@ -220,8 +251,11 @@ const Note: React.FC<NoteProps> = ({
   const containerStyle = {
     backgroundColor: bg,
     clipPath: clipPathStyle,
-    filter: readOnly ? 'saturate(0.85) contrast(0.95)' : 'none',
-    willChange: 'transform'
+    filter: readOnly ? 'saturate(0.85) contrast(0.95)' : undefined,
+    willChange: isDragging ? 'transform' : undefined,
+    backfaceVisibility: 'hidden' as const,
+    WebkitFontSmoothing: 'antialiased' as const,
+    textRendering: 'geometricPrecision' as const
   };
 
   const plainText = getPlainText(note.content);
@@ -286,8 +320,8 @@ const Note: React.FC<NoteProps> = ({
         aspectRatio: isGridMode && !isTitle && !(isDragging && isMobile) ? '1 / 1' : 'auto',
         color: text,
         rotate: combinedRotation,
-        x: isGridMode ? undefined : x,
-        y: isGridMode ? undefined : y,
+        x: (!isGridMode || (isGridMode && canvasScale !== 1 && isDragging)) ? x : undefined,
+        y: (!isGridMode || (isGridMode && canvasScale !== 1 && isDragging)) ? y : undefined,
         cursor: readOnly ? 'pointer' : (isDragging ? 'grabbing' : 'grab'),
         ...containerStyle
       }}

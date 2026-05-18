@@ -27,6 +27,7 @@ const skipContentRules = [
   /^dist\//,
   /^node_modules\//,
   /^package-lock\.json$/,
+  /^yarn\.lock$/,
   /^public\/.*\.(png|jpg|jpeg|gif|webp|ico|svg)$/i,
 ];
 

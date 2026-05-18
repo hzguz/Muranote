@@ -28,7 +28,7 @@ const writeAuditLog = (entry) => {
 };
 
 if (!uid || !valueArg || !['true', 'false'].includes(valueArg) || !isValidUid) {
-  console.error('Uso: npm run admin:claim -- <UID> <true|false> --confirm');
+  console.error('Uso: yarn admin:claim <UID> <true|false> --confirm');
   console.error('Regras: UID sem espacos e com no maximo 128 caracteres.');
   writeAuditLog({
     action: 'setCustomUserClaims',
@@ -44,7 +44,7 @@ const isAdmin = valueArg === 'true';
 
 if (!hasConfirmFlag) {
   console.error('Confirmacao obrigatoria ausente.');
-  console.error('Repita com: npm run admin:claim -- <UID> <true|false> --confirm');
+  console.error('Repita com: yarn admin:claim <UID> <true|false> --confirm');
   writeAuditLog({
     action: 'setCustomUserClaims',
     uid,

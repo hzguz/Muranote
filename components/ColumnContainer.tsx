@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useMotionValue, AnimatePresence } from 'framer-motion';
+import { motion, useMotionValue, AnimatePresence, PanInfo } from 'framer-motion';
 import { X, Plus, Pencil, Lock, Book, Book2, Notebook, Quote, Bookmark, Typography, Search, Bulb, Heart, LayoutColumns, Star } from 'tabler-icons-react';
 import { Grid2x2, Grid3x3 } from 'lucide-react';
 import { ColumnData, NoteData, Language } from '../types';
@@ -24,6 +24,7 @@ interface ColumnContainerProps {
     isDragTarget?: boolean;
     onFocus?: (id: string) => void;
     isDefaultColumn?: boolean;
+    canvasScale?: number;
 }
 
 const ColumnContainer: React.FC<ColumnContainerProps> = ({
@@ -39,13 +40,15 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
     lang,
     isDragTarget = false,
     onFocus,
-    isDefaultColumn = false
+    isDefaultColumn = false,
+    canvasScale = 1
 }) => {
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [isPickingIcon, setIsPickingIcon] = useState(false);
     const [tempTitle, setTempTitle] = useState(column.title);
     const [gridCols, setGridCols] = useState<2 | 3>(2);
     const iconPickerRef = useRef<HTMLDivElement>(null);
+    const dragStartRef = useRef<{ pointerX: number; pointerY: number; x: number; y: number } | null>(null);
     const t = TRANSLATIONS[lang];
 
     // Close icon picker when clicking outside
@@ -187,10 +190,23 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
             drag={!isReadOnly}
             dragMomentum={false}
             dragElastic={0}
-            onDragStart={() => {
+            onDragStart={(_event, info: PanInfo) => {
+                dragStartRef.current = { pointerX: info.point.x, pointerY: info.point.y, x: x.get(), y: y.get() };
                 if (onFocus) onFocus(column.id);
             }}
-            onDragEnd={() => {
+            onDrag={(_event, info: PanInfo) => {
+                if (!dragStartRef.current) return;
+                const scale = Math.max(canvasScale, 0.001);
+                x.set(dragStartRef.current.x + (info.point.x - dragStartRef.current.pointerX) / scale);
+                y.set(dragStartRef.current.y + (info.point.y - dragStartRef.current.pointerY) / scale);
+            }}
+            onDragEnd={(_event, info: PanInfo) => {
+                if (dragStartRef.current) {
+                    const scale = Math.max(canvasScale, 0.001);
+                    x.set(dragStartRef.current.x + (info.point.x - dragStartRef.current.pointerX) / scale);
+                    y.set(dragStartRef.current.y + (info.point.y - dragStartRef.current.pointerY) / scale);
+                }
+                dragStartRef.current = null;
                 onUpdatePosition(column.id, x.get(), y.get());
             }}
             onPointerDown={() => {

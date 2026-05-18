@@ -87,8 +87,8 @@ const normalizeColumn = (raw: Partial<ColumnData>, fallbackId?: string, fallback
     };
 };
 
-const MIN_CANVAS_SCALE = 0.1;
-const MAX_CANVAS_SCALE = 3;
+const MIN_CANVAS_SCALE = 0.4;
+const MAX_CANVAS_SCALE = 2.4;
 
 function App() {
     const { lang, setLang, t } = useLanguage();
@@ -131,6 +131,7 @@ function App() {
     const viewportX = useMotionValue(0);
     const viewportY = useMotionValue(0);
     const viewportScale = useMotionValue(1);
+    const [canvasScale, setCanvasScale] = useState(1);
     const [isPanning, setIsPanning] = useState(false);
     const [showResetView, setShowResetView] = useState(false);
 
@@ -264,6 +265,8 @@ function App() {
         });
         return () => { unsubscribeX(); unsubscribeY(); };
     }, [viewportX, viewportY]);
+
+    useEffect(() => viewportScale.on("change", setCanvasScale), [viewportScale]);
 
     const handleResetView = () => {
         animate(viewportX, 0, { type: "spring", stiffness: 200, damping: 25 });
@@ -751,8 +754,8 @@ function App() {
         const newCol: ColumnData = {
             id: uuidv4(),
             title: t.colNew,
-            x: (window.innerWidth / 2) - viewportX.get() - 250,
-            y: (window.innerHeight / 2) - viewportY.get() - 250,
+            x: ((window.innerWidth / 2) - viewportX.get()) / canvasScale - 250,
+            y: ((window.innerHeight / 2) - viewportY.get()) / canvasScale - 250,
             zIndex: maxZIndex + 1,
             createdAt: timestamp,
             updatedAt: timestamp,
@@ -770,7 +773,7 @@ function App() {
                 setMaxZIndex((prev) => Math.max(10, prev - 1));
             }
         })();
-    }, [columns, isReadOnly, spyTarget, t.colNew, viewportX, viewportY, maxZIndex, writableOwnerId, persistColumnSafe]);
+    }, [columns, isReadOnly, spyTarget, t.colNew, viewportX, viewportY, canvasScale, maxZIndex, writableOwnerId, persistColumnSafe]);
 
     const removeColumn = useCallback((colId: string) => {
         if (columns.length <= 1 || (isReadOnly && !spyTarget)) return;
@@ -891,8 +894,9 @@ function App() {
             const vy = viewportY.get();
             const offsetX = dragOffset?.x ?? 0;
             const offsetY = dragOffset?.y ?? 0;
-            const x = point.x - vx - offsetX;
-            const y = point.y - vy - offsetY;
+            const scale = Math.max(canvasScale, 0.001);
+            const x = (point.x - vx - offsetX) / scale;
+            const y = (point.y - vy - offsetY) / scale;
             const updated = { ...sourceNote, x, y, columnId: undefined, zIndex: nextZ, updatedAt: Date.now() };
             updatedNotes = currentNotes.map((note) => (note.id === noteId ? updated : note));
             changedNotes = [updated];
@@ -923,7 +927,7 @@ function App() {
                 setNotes(rollbackSnapshot);
             }
         })();
-    }, [isReadOnly, spyTarget, isMobile, isGridMode, dragOverColumnId, maxZIndex, viewportX, viewportY, writableOwnerId, queueNotePersist, persistNoteBatchSafe]);
+    }, [isReadOnly, spyTarget, isMobile, isGridMode, dragOverColumnId, maxZIndex, viewportX, viewportY, canvasScale, writableOwnerId, queueNotePersist, persistNoteBatchSafe]);
 
     const handleNoteSwap = useCallback((sourceId: string, targetId: string) => {
         if (isReadOnly && !spyTarget) return;
@@ -954,8 +958,8 @@ function App() {
         let x = 0;
         let y = 0;
         if (!isGridMode) {
-            x = (window.innerWidth / 2) - viewportX.get() - (INITIAL_NOTE_WIDTH / 2);
-            y = (window.innerHeight / 2) - viewportY.get() - (INITIAL_NOTE_HEIGHT / 2);
+            x = ((window.innerWidth / 2) - viewportX.get()) / canvasScale - (INITIAL_NOTE_WIDTH / 2);
+            y = ((window.innerHeight / 2) - viewportY.get()) / canvasScale - (INITIAL_NOTE_HEIGHT / 2);
             x += (Math.random() * 40 - 20);
             y += (Math.random() * 40 - 20);
         }
@@ -993,7 +997,7 @@ function App() {
             setNotes(rollbackSnapshot);
             setActiveNote(null);
         }
-    }, [isReadOnly, spyTarget, columns, isGridMode, maxZIndex, viewportX, viewportY, writableOwnerId, persistSingleNote]);
+    }, [isReadOnly, spyTarget, columns, isGridMode, maxZIndex, viewportX, viewportY, canvasScale, writableOwnerId, persistSingleNote]);
 
     const updateNotePosition = useCallback((id: string, screenX: number, screenY: number) => {
         if (isGridMode || (isReadOnly && !spyTarget)) return;
@@ -1190,6 +1194,7 @@ function App() {
                         onUpdateTitle={() => { }}
                         onUpdateIcon={() => { }}
                         isDefaultColumn={false}
+                        canvasScale={1}
                         renderNote={(item) => (
                             <Note
                                 key={item.id}
@@ -1213,6 +1218,7 @@ function App() {
                                 stroke={currentStroke}
                                 readOnly={false}
                                 lang={lang}
+                                canvasScale={1}
                             />
                         )}
                     />
@@ -1237,6 +1243,7 @@ function App() {
                             onUpdateTitle={updateColumnTitle}
                             onUpdateIcon={updateColumnIcon}
                             isDefaultColumn={col.id === 'default-col'}
+                            canvasScale={1}
                             renderNote={(item) => (
                                 <Note
                                     key={item.id}
@@ -1260,6 +1267,7 @@ function App() {
                                     stroke={currentStroke}
                                     readOnly={(isReadOnly && !spyTarget)}
                                     lang={lang}
+                                    canvasScale={1}
                                 />
                             )}
                         />
@@ -1312,6 +1320,7 @@ function App() {
                                         isDragTarget={dragOverColumnId === col.id && draggingId !== null}
                                         onFocus={bringColumnToFront}
                                         isDefaultColumn={col.id === 'default-col'}
+                                        canvasScale={canvasScale}
                                         renderNote={(item) => (
                                             <Note
                                                 key={item.id}
@@ -1335,6 +1344,7 @@ function App() {
                                                 stroke={currentStroke}
                                                 readOnly={(isReadOnly && !spyTarget)}
                                                 lang={lang}
+                                                canvasScale={canvasScale}
                                             />
                                         )}
                                     />
@@ -1360,6 +1370,7 @@ function App() {
                                     onGridDrop={handleGridDrop}
                                     readOnly={(isReadOnly && !spyTarget)}
                                     lang={lang}
+                                    canvasScale={canvasScale}
                                 />
                             ))}
                         </AnimatePresence>

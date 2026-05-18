@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "yarn@1.22.22",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,9 +12,9 @@
     "preview": "vite preview",
     "admin:claim": "node scripts/setAdminClaim.mjs",
     "security:secrets": "node scripts/checkTrackedSecrets.mjs",
-    "security:audit": "npm audit --omit=dev",
-    "security:audit:all": "npm audit",
-    "check:prepublish": "npm run typecheck && npm run build && npm run check:unused && npm run security:secrets && npm run security:audit"
+    "security:audit": "yarn audit --groups dependencies",
+    "security:audit:all": "yarn audit",
+    "check:prepublish": "yarn typecheck && yarn build && yarn check:unused && yarn security:secrets && yarn security:audit"
   },
   "dependencies": {
     "@types/dompurify": "^3.0.5",

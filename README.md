@@ -89,7 +89,7 @@ Muranote is a sticky-note wall built with React, Vite, and Firebase. It combines
 ## Requirements
 
 - Node.js 20+ recommended
-- npm
+- Yarn
 - A Firebase project with:
   - Google Authentication enabled
   - Firestore enabled
@@ -125,39 +125,39 @@ Notes:
 Install dependencies:
 
 ```bash
-npm install
+yarn install
 ```
 
 Start the development server:
 
 ```bash
-npm run dev
+yarn dev
 ```
 
 Create a production build:
 
 ```bash
-npm run build
+yarn build
 ```
 
 Preview the production build locally:
 
 ```bash
-npm run preview
+yarn preview
 ```
 
 ## Available Scripts
 
-- `npm run dev` starts Vite in development mode
-- `npm run build` creates a production build
-- `npm run preview` previews the built app
-- `npm run typecheck` runs TypeScript without emitting files
-- `npm run check:unused` checks for unused locals and parameters
-- `npm run security:secrets` scans tracked files for obvious secret leaks
-- `npm run security:audit` runs `npm audit --omit=dev`
-- `npm run security:audit:all` runs a full `npm audit`
-- `npm run check:prepublish` runs the main quality and security checks
-- `npm run admin:claim -- <UID> <true|false> --confirm` updates Firebase custom admin claims
+- `yarn dev` starts Vite in development mode
+- `yarn build` creates a production build
+- `yarn preview` previews the built app
+- `yarn typecheck` runs TypeScript without emitting files
+- `yarn check:unused` checks for unused locals and parameters
+- `yarn security:secrets` scans tracked files for obvious secret leaks
+- `yarn security:audit` runs a dependency security audit
+- `yarn security:audit:all` runs the full audit available in Yarn
+- `yarn check:prepublish` runs the main quality and security checks
+- `yarn admin:claim -- <UID> <true|false> --confirm` updates Firebase custom admin claims
 
 ## Admin Claim Script
 
@@ -169,7 +169,7 @@ The admin claim utility reads a Firebase service account from one of these envir
 Example:
 
 ```bash
-npm run admin:claim -- some-user-uid true --confirm
+yarn admin:claim some-user-uid true --confirm
 ```
 
 Important:
@@ -211,7 +211,7 @@ For the existing deployment notes, see [docs/deploy-vercel-firebase.md](./docs/d
 
 ## Known Operational Caveat
 
-`scripts/checkTrackedSecrets.mjs` currently self-matches one of its own detection patterns, which can create a false positive when running `npm run security:secrets`. Treat that script result carefully until the scanner exclusion logic is adjusted.
+`scripts/checkTrackedSecrets.mjs` currently self-matches one of its own detection patterns, which can create a false positive when running `yarn security:secrets`. Treat that script result carefully until the scanner exclusion logic is adjusted.
 
 ## Maintenance Reset
 
