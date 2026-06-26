@@ -265,10 +265,10 @@ const Note: React.FC<NoteProps> = ({
 
   const reminderLabel = formatReminderShort(note.reminder);
   const reminderStatus = getReminderStatus(note.reminder);
-  // The seal follows the note's own palette; due/overdue states are signalled
-  // by a subtle ring and stronger opacity instead of an off-palette color.
+  // The date follows the note's own text color; due/overdue states read as
+  // full opacity, upcoming ones are slightly dimmed.
   const reminderIsUrgent = reminderStatus === 'overdue' || reminderStatus === 'today';
-  const reminderSealClass = reminderIsUrgent ? 'ring-1 ring-black/25 opacity-100' : 'opacity-75';
+  const reminderSealClass = reminderIsUrgent ? 'opacity-100' : 'opacity-70';
   const displayTitle = note.title || (isTitle ? t.newTitle : t.newNote);
 
   // Título sempre ocupa 2 espaços em qualquer tela no modo grid
@@ -368,8 +368,8 @@ const Note: React.FC<NoteProps> = ({
             <div className="mt-1 md:mt-2 pt-1 md:pt-2 border-t border-black/5 flex justify-between items-center gap-2 opacity-80 hover:opacity-100 transition-opacity shrink-0">
               {isReminder ? (
                 <span
-                  className={`flex items-center gap-1 min-w-0 text-[9px] md:text-[11px] font-bold lowercase rounded-full px-2 py-0.5 ${reminderSealClass}`}
-                  style={{ backgroundColor: dark, color: text }}
+                  className={`flex items-center gap-1 min-w-0 text-[9px] md:text-[11px] font-bold lowercase ${reminderSealClass}`}
+                  style={{ color: text }}
                 >
                   <CalendarEvent size={isMobile ? 10 : 12} strokeWidth={2.2} className="shrink-0" />
                   <span className="truncate">{reminderLabel || '...'}</span>
