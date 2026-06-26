@@ -560,10 +560,21 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
     const rect = reminderChipRef.current?.getBoundingClientRect();
     if (rect) {
       const POPOVER_WIDTH = 280;
+      const POPOVER_HEIGHT = 340; // approximate calendar height
+      const GAP = 8;
       const MARGIN = 16;
+
       // Keep the popover within the viewport's right edge.
-      const left = Math.min(rect.left, window.innerWidth - POPOVER_WIDTH - MARGIN);
-      setDatePickerPos({ top: rect.bottom + 8, left: Math.max(MARGIN, left) });
+      const left = Math.max(MARGIN, Math.min(rect.left, window.innerWidth - POPOVER_WIDTH - MARGIN));
+
+      // The chip sits in the footer, so prefer opening upward; fall back to
+      // downward only when there isn't room above.
+      const spaceAbove = rect.top;
+      const top = spaceAbove >= POPOVER_HEIGHT + GAP
+        ? rect.top - POPOVER_HEIGHT - GAP
+        : rect.bottom + GAP;
+
+      setDatePickerPos({ top: Math.max(MARGIN, top), left });
     }
     setIsDatePickerOpen(true);
   };
@@ -716,22 +727,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                   placeholder={isTitle ? t.titlePlaceholder : t.titleDef}
                   className={`${titleInputClass} font-bold bg-transparent border-none outline-none placeholder-current opacity-90 w-full transition-all duration-300 select-text flex-shrink-0 mt-2`}
                 />
-
-                {isReminder && (
-                  <div className="mt-3 md:mt-4 flex items-center gap-2 flex-wrap">
-                    <button
-                      ref={reminderChipRef}
-                      type="button"
-                      disabled={readOnly}
-                      onClick={toggleDatePicker}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/10 bg-black/5 text-xs md:text-sm font-bold lowercase transition-all ${readOnly ? 'opacity-60' : 'hover:bg-black/10'}`}
-                    >
-                      <CalendarEvent size={isMobile ? 16 : 15} strokeWidth={2.2} />
-                      <span>{reminderLabel || t.reminderNone}</span>
-                      <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform ${isDatePickerOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                  </div>
-                )}
 
                 {!isTitle && !readOnly && (
                   <div className="flex items-center gap-2 mt-4 md:mt-6 border-[1px] border-black/10 rounded-2xl p-1.5 w-fit bg-black/5">
@@ -973,7 +968,20 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
               <motion.div variants={contentVariants} className="shrink-0 z-30 flex flex-col border-t-[1px] border-black/5 pb-safe" style={{ backgroundColor: bg }}>
                 <div className="py-3 px-4 md:px-7 flex justify-between items-center mb-safe">
                   <div className="flex flex-col gap-2">
-                    {!isTitle && (
+                    {isReminder ? (
+                      <button
+                        ref={reminderChipRef}
+                        type="button"
+                        disabled={readOnly}
+                        onClick={toggleDatePicker}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/15 bg-black/5 text-xs md:text-sm font-bold lowercase transition-all ${readOnly ? 'opacity-60' : 'hover:bg-black/10'}`}
+                        style={{ color: text }}
+                      >
+                        <CalendarEvent size={isMobile ? 16 : 15} strokeWidth={2.2} />
+                        <span>{reminderLabel || t.reminderNone}</span>
+                        <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform ${isDatePickerOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                    ) : !isTitle && (
                       <StarRating rating={editedNote.rating} onChange={readOnly ? undefined : (r) => handleChange('rating', r)} readonly={readOnly} size={24} gap="gap-0" color={text} stroke={stroke} pulsingId={pulsingId} />
                     )}
                   </div>

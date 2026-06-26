@@ -242,6 +242,7 @@ const Note: React.FC<NoteProps> = ({
   };
 
   const isTitle = note.type === 'title';
+  const isReminder = note.type === 'reminder';
   const IconComp = note.icon ? IconMap[note.icon] : Bookmark;
   const currentSizeKey = note.titleSize || 'small';
   const titleClass = isTitle ? TITLE_SIZE_CLASSES[currentSizeKey] : '';
@@ -264,11 +265,10 @@ const Note: React.FC<NoteProps> = ({
 
   const reminderLabel = formatReminderShort(note.reminder);
   const reminderStatus = getReminderStatus(note.reminder);
-  const reminderSealClass = reminderStatus === 'overdue'
-    ? 'bg-red-500/15 text-red-700'
-    : reminderStatus === 'today'
-      ? 'bg-amber-500/20 text-amber-800'
-      : 'bg-black/5 text-current opacity-70';
+  // The seal follows the note's own palette; due/overdue states are signalled
+  // by a subtle ring and stronger opacity instead of an off-palette color.
+  const reminderIsUrgent = reminderStatus === 'overdue' || reminderStatus === 'today';
+  const reminderSealClass = reminderIsUrgent ? 'ring-1 ring-black/25 opacity-100' : 'opacity-75';
   const displayTitle = note.title || (isTitle ? t.newTitle : t.newNote);
 
   // Título sempre ocupa 2 espaços em qualquer tela no modo grid
@@ -366,14 +366,18 @@ const Note: React.FC<NoteProps> = ({
             </div>
 
             <div className="mt-1 md:mt-2 pt-1 md:pt-2 border-t border-black/5 flex justify-between items-center gap-2 opacity-80 hover:opacity-100 transition-opacity shrink-0">
-              <div className="shrink-0">
-                <StarRating rating={note.rating} readonly size={isMobile ? 10 : 12} gap="gap-0" color={text} stroke={stroke} />
-              </div>
-              {reminderLabel && (
-                <span className={`flex items-center gap-1 min-w-0 text-[9px] md:text-[11px] font-bold lowercase rounded-full px-1.5 py-0.5 ${reminderSealClass}`}>
+              {isReminder ? (
+                <span
+                  className={`flex items-center gap-1 min-w-0 text-[9px] md:text-[11px] font-bold lowercase rounded-full px-2 py-0.5 ${reminderSealClass}`}
+                  style={{ backgroundColor: dark, color: text }}
+                >
                   <CalendarEvent size={isMobile ? 10 : 12} strokeWidth={2.2} className="shrink-0" />
-                  <span className="truncate">{reminderLabel}</span>
+                  <span className="truncate">{reminderLabel || '...'}</span>
                 </span>
+              ) : (
+                <div className="shrink-0">
+                  <StarRating rating={note.rating} readonly size={isMobile ? 10 : 12} gap="gap-0" color={text} stroke={stroke} />
+                </div>
               )}
             </div>
           </div>
