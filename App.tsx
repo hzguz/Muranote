@@ -125,7 +125,7 @@ function App() {
     const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
     const [maxZIndex, setMaxZIndex] = useState(10);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    const [viewMode, setViewMode] = useState<ViewMode>('free');
+    const [viewMode] = useState<ViewMode>('free');
     const [currentStroke, setCurrentStroke] = useState(ICON_STROKE_WIDTH.desktop);
 
     const viewportX = useMotionValue(0);
@@ -975,6 +975,7 @@ function App() {
             rating: 0,
             icon: type === 'title' ? TITLE_ICONS[0] : undefined,
             titleSize: type === 'title' ? 'small' : undefined,
+            reminder: type === 'reminder' ? { due: timestamp } : undefined,
             columnId: isGridMode ? currentColumnId : undefined,
             x,
             y,

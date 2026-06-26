@@ -10,14 +10,24 @@ export type PaletteNoteColor =
   | 'orange'
   | 'teal'
   | 'slate';
-export type NoteType = 'note' | 'title';
+export type NoteType = 'note' | 'title' | 'reminder';
 export type TitleSize = 'small' | 'medium' | 'large';
 export type Language = 'en';
 export type LetterSealIcon = 'heart' | 'star' | 'sparkles' | 'flower' | 'moon' | 'sun' | 'feather' | 'gem';
 
+/**
+ * Reminder scheduling for a note. Timestamps are epoch milliseconds (UTC),
+ * matching the rest of NoteData (createdAt/updatedAt). Keys are omitted when
+ * unset — never store `undefined` so the Firestore write stays valid.
+ */
+export interface NoteReminder {
+  start?: number; // optional range start (epoch ms)
+  due?: number; // the main / final date (epoch ms)
+}
+
 export interface NoteData {
   id: string;
-  type: NoteType; // 'note' or 'title'
+  type: NoteType; // 'note', 'title' or 'reminder'
   title: string;
   content: string; // Used for note content
   color: string;
@@ -26,6 +36,9 @@ export interface NoteData {
   // Title Fields
   icon?: string; // Icon name for titles
   titleSize?: TitleSize; // Font size preference
+
+  // Reminder Fields
+  reminder?: NoteReminder; // present only on reminder-aware notes
 
   // Grid/Kanban Fields
   columnId?: string;

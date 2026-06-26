@@ -1,11 +1,12 @@
 
 import React, { useRef, useState, useEffect, memo } from 'react';
 import { motion, useMotionValue, useTransform, useSpring, useVelocity, PanInfo, animate } from 'framer-motion';
-import { Book, Book2, Notebook, Quote, Pencil, Bookmark, Typography, Search, Bulb, Heart, Circle, Lock } from 'tabler-icons-react';
+import { Book, Book2, Notebook, Quote, Pencil, Bookmark, Typography, Search, Bulb, Heart, Circle, Lock, CalendarEvent } from 'tabler-icons-react';
 import { NoteData, Language } from '../types';
 import { TITLE_SIZE_CLASSES, TITLE_ICON_SIZES, TRANSLATIONS } from '../constants';
 import StarRating from './StarRating';
 import { resolveNoteColors } from '../utils/noteColors';
+import { formatReminderShort, getReminderStatus } from '../utils/reminders';
 
 interface NoteProps {
   note: NoteData;
@@ -260,6 +261,14 @@ const Note: React.FC<NoteProps> = ({
 
   const plainText = getPlainText(note.content);
   const previewContent = isTitle ? "" : (plainText || "...");
+
+  const reminderLabel = formatReminderShort(note.reminder);
+  const reminderStatus = getReminderStatus(note.reminder);
+  const reminderSealClass = reminderStatus === 'overdue'
+    ? 'bg-red-500/15 text-red-700'
+    : reminderStatus === 'today'
+      ? 'bg-amber-500/20 text-amber-800'
+      : 'bg-black/5 text-current opacity-70';
   const displayTitle = note.title || (isTitle ? t.newTitle : t.newNote);
 
   // Título sempre ocupa 2 espaços em qualquer tela no modo grid
@@ -356,8 +365,14 @@ const Note: React.FC<NoteProps> = ({
               </p>
             </div>
 
-            <div className="mt-1 md:mt-2 pt-1 md:pt-2 border-t border-black/5 flex justify-between items-center opacity-80 hover:opacity-100 transition-opacity shrink-0">
+            <div className="mt-1 md:mt-2 pt-1 md:pt-2 border-t border-black/5 flex justify-between items-center gap-2 opacity-80 hover:opacity-100 transition-opacity shrink-0">
               <StarRating rating={note.rating} readonly size={isMobile ? 10 : 12} gap="gap-0" color={text} stroke={stroke} />
+              {reminderLabel && (
+                <span className={`flex items-center gap-1 text-[9px] md:text-[11px] font-bold lowercase whitespace-nowrap rounded-full px-1.5 py-0.5 ${reminderSealClass}`}>
+                  <CalendarEvent size={isMobile ? 10 : 12} strokeWidth={2.2} />
+                  {reminderLabel}
+                </span>
+              )}
             </div>
           </div>
         </div>

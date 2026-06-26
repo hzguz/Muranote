@@ -25,6 +25,7 @@ export const PALETTE_COLORS: Record<PaletteNoteColor, { bg: string; dark: string
 export const DEFAULT_TYPE_COLORS: Record<NoteType, string> = {
   note: 'yellow',
   title: 'blue',
+  reminder: 'teal',
 };
 
 const HEX_COLOR_REGEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;

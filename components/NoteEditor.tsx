@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { X, Trash, Book, Book2, Notebook, Quote, Pencil, Bookmark, Typography, Search, Bulb, Heart, Circle, Bold, Italic, Underline, ChevronDown, Lock, FolderPlus, Palette } from 'tabler-icons-react';
+import { X, Trash, Book, Book2, Notebook, Quote, Pencil, Bookmark, Typography, Search, Bulb, Heart, Circle, Bold, Italic, Underline, ChevronDown, Lock, FolderPlus, Palette, CalendarEvent, CalendarTime } from 'tabler-icons-react';
 import { NoteData, Language } from '../types';
 import { COLORS, COLOR_KEYS, TITLE_ICONS, TITLE_SIZE_CLASSES, TRANSLATIONS } from '../constants';
 import StarRating from './StarRating';
+import DatePicker from './DatePicker';
 import { looksLikeBlockedRichPayload, sanitizeNoteContent } from '../utils/noteSecurity';
 import { resolveNoteColors, sanitizeNoteColor, toHexInputValue } from '../utils/noteColors';
+import { buildReminder, formatReminderShort, isReminderRange } from '../utils/reminders';
 
 interface NoteEditorProps {
   note: NoteData | null;
@@ -31,6 +33,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
   const [activeFormats, setActiveFormats] = useState({ bold: false, italic: false, underline: false });
   const [triggeredRatings, setTriggeredRatings] = useState<Set<number>>(new Set());
   const [pulsingId, setPulsingId] = useState<number | null>(null);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const contentEditableRef = useRef<HTMLDivElement>(null);
@@ -71,6 +74,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
 
     if (!isOpen) {
       lastSyncId.current = null;
+      setIsDatePickerOpen(false);
     }
   }, [isOpen, editedNote?.id]);
 
@@ -540,7 +544,25 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
 
   const { bg, text, dark } = resolveNoteColors(editedNote.color);
   const isTitle = editedNote.type === 'title';
+  const isReminder = editedNote.type === 'reminder';
+  const reminder = editedNote.reminder;
+  const rangeMode = isReminderRange(reminder);
+  const reminderLabel = formatReminderShort(reminder);
   const isCustomColorSelected = !COLOR_KEYS.includes(editedNote.color as any);
+
+  const updateReminder = (start: number | null, due: number | null) => {
+    handleChange('reminder', buildReminder(start, due));
+  };
+
+  const toggleReminderRange = () => {
+    // Entering range mode seeds the start from the existing due date; leaving it
+    // collapses back to a single due date.
+    if (rangeMode) {
+      updateReminder(null, reminder?.due ?? null);
+    } else {
+      updateReminder(reminder?.due ?? Date.now(), reminder?.due ?? Date.now());
+    }
+  };
   const titleInputClass = isTitle ? TITLE_SIZE_CLASSES[editedNote.titleSize || 'small'] : 'text-lg md:text-3xl';
 
   const containerVariants: Variants = isMobile ? {
@@ -621,8 +643,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
               className={`relative w-full overflow-x-hidden overflow-y-hidden flex flex-col shadow-2xl shadow-primary/20 ${isMobile ? 'h-[70dvh] rounded-t-3xl' : 'max-w-2xl max-h-[90vh] rounded-3xl'}`}
               style={{ backgroundColor: bg, color: text }}
             >
-              <motion.div variants={contentVariants} className="flex justify-between items-center p-3 md:p-5 pb-2 md:pb-3 shrink-0 z-30">
-                <div className="flex gap-2 md:gap-3 items-center">
+              <motion.div variants={contentVariants} className="flex justify-between items-start gap-2 p-3 md:p-5 pb-2 md:pb-3 shrink-0 z-30">
+                <div className="flex flex-wrap gap-2 md:gap-3 items-center">
                   {!readOnly ? (
                     <>
                       {COLOR_KEYS.map((c) => (
@@ -667,7 +689,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                   whileHover={{ rotate: 90, scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={handleSaveAndClose}
-                  className="p-2 md:p-2 hover:bg-black/5 rounded-full transition-colors flex items-center justify-center"
+                  className="shrink-0 p-2 md:p-2 hover:bg-black/5 rounded-full transition-colors flex items-center justify-center"
                 >
                   {isMobile ? <ChevronDown size={28} color={text} strokeWidth={stroke} /> : <X size={24} color={text} strokeWidth={stroke} />}
                 </motion.button>
@@ -682,6 +704,53 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                   placeholder={isTitle ? t.titlePlaceholder : t.titleDef}
                   className={`${titleInputClass} font-bold bg-transparent border-none outline-none placeholder-current opacity-90 w-full transition-all duration-300 select-text flex-shrink-0 mt-2`}
                 />
+
+                {isReminder && (
+                  <div className="mt-3 md:mt-4 flex flex-col gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <button
+                        type="button"
+                        disabled={readOnly}
+                        onClick={() => setIsDatePickerOpen((open) => !open)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/10 bg-black/5 text-xs md:text-sm font-bold lowercase transition-all ${readOnly ? 'opacity-60' : 'hover:bg-black/10'}`}
+                      >
+                        <CalendarEvent size={isMobile ? 16 : 15} strokeWidth={2.2} />
+                        <span>{reminderLabel || t.reminderNone}</span>
+                        <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform ${isDatePickerOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      {!readOnly && (
+                        <button
+                          type="button"
+                          onClick={toggleReminderRange}
+                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] md:text-xs font-bold lowercase transition-all ${rangeMode ? 'bg-black/80 text-white' : 'border border-black/10 bg-black/5 hover:bg-black/10'}`}
+                          title={t.reminderRange}
+                        >
+                          <CalendarTime size={14} strokeWidth={2.2} />
+                          <span className="hidden md:inline">{t.reminderRange}</span>
+                        </button>
+                      )}
+                    </div>
+                    <AnimatePresence initial={false}>
+                      {isDatePickerOpen && !readOnly && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-1 p-3 rounded-2xl border border-black/10 bg-black/[0.03]">
+                            <DatePicker
+                              start={reminder?.start ?? null}
+                              due={reminder?.due ?? null}
+                              rangeMode={rangeMode}
+                              onChange={updateReminder}
+                            />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
 
                 {!isTitle && !readOnly && (
                   <div className="flex items-center gap-2 mt-4 md:mt-6 border-[1px] border-black/10 rounded-2xl p-1.5 w-fit bg-black/5">

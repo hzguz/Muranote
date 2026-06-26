@@ -5,7 +5,6 @@ import {
   Flower2,
   Gem,
   Heart,
-  Mail,
   Moon,
   Sparkles,
   Star,

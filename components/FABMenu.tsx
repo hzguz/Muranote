@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, FilePlus, LayoutColumns, EyeOff } from 'tabler-icons-react';
+import { Plus, FilePlus, LayoutColumns, EyeOff, CalendarPlus } from 'tabler-icons-react';
 import { MailPlus } from 'lucide-react';
 import { UserProfile, NoteType, Language } from '../types';
 import { TRANSLATIONS } from '../constants';
@@ -57,6 +57,17 @@ const FABMenu: React.FC<FABMenuProps> = ({
                             </span>
                             <div className="bg-primary/10 p-2 rounded-full text-primary">
                                 <LayoutColumns size={20} strokeWidth={currentStroke} />
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => onCreateItem('reminder')}
+                            className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors group"
+                        >
+                            <span className="font-bold text-primary opacity-80 group-hover:opacity-100">
+                                {t.addReminder}
+                            </span>
+                            <div className="bg-primary/10 p-2 rounded-full text-primary">
+                                <CalendarPlus size={20} strokeWidth={currentStroke} />
                             </div>
                         </button>
                         <button
