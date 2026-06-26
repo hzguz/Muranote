@@ -1,16 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'tabler-icons-react';
 
 interface DatePickerProps {
-  /** Selected range start (epoch ms) or null. */
-  start: number | null;
-  /** Selected due / single date (epoch ms) or null. */
+  /** Selected date (epoch ms) or null. */
   due: number | null;
-  /** Emits the new (start, due) selection on every change. */
-  onChange: (start: number | null, due: number | null) => void;
-  /** When true, the user picks a start AND a due date; otherwise a single date. */
-  rangeMode: boolean;
+  /** Emits the new selected date on every change. */
+  onChange: (due: number | null) => void;
 }
 
 const WEEKDAYS = ['s', 'm', 't', 'w', 't', 'f', 's'];
@@ -38,18 +34,9 @@ const buildMonthGrid = (viewYear: number, viewMonth: number): (number | null)[] 
   return cells;
 };
 
-const DatePicker: React.FC<DatePickerProps> = ({ start, due, onChange, rangeMode }) => {
-  const anchor = due ?? start ?? Date.now();
+const DatePicker: React.FC<DatePickerProps> = ({ due, onChange }) => {
+  const anchor = due ?? Date.now();
   const [viewDate, setViewDate] = useState<Date>(new Date(anchor));
-  // While building a range, the first clicked day is held here until the second
-  // click closes the range. This keeps the partial selection visible even though
-  // the stored reminder collapses a lone date down to a single `due`.
-  const [pendingStart, setPendingStart] = useState<number | null>(null);
-
-  // Discard any half-finished range selection when the mode is switched off.
-  useEffect(() => {
-    if (!rangeMode) setPendingStart(null);
-  }, [rangeMode]);
 
   const viewYear = viewDate.getFullYear();
   const viewMonth = viewDate.getMonth();
@@ -61,34 +48,8 @@ const DatePicker: React.FC<DatePickerProps> = ({ start, due, onChange, rangeMode
 
   const handleDayClick = (dayTimestamp: number): void => {
     // Reminders are day-granular: always normalize to the start of the day.
-    const day = startOfDay(dayTimestamp);
-
-    if (!rangeMode) {
-      onChange(null, day);
-      return;
-    }
-
-    // First click of a range: remember the anchor and preview it as the date.
-    if (pendingStart === null) {
-      setPendingStart(day);
-      onChange(null, day);
-      return;
-    }
-
-    // Second click: close the range (ordering handled by buildReminder upstream).
-    const rangeStart = Math.min(pendingStart, day);
-    const rangeEnd = Math.max(pendingStart, day);
-    setPendingStart(null);
-    onChange(rangeStart, rangeEnd);
+    onChange(startOfDay(dayTimestamp));
   };
-
-  const effectiveStart = rangeMode ? (start ?? pendingStart) : null;
-
-  const isSelected = (dayTimestamp: number): boolean =>
-    (effectiveStart !== null && sameDay(dayTimestamp, effectiveStart)) || (due !== null && sameDay(dayTimestamp, due));
-
-  const isInRange = (dayTimestamp: number): boolean =>
-    rangeMode && effectiveStart !== null && due !== null && dayTimestamp > startOfDay(effectiveStart) && dayTimestamp < startOfDay(due);
 
   return (
     <div className="flex flex-col gap-3 w-full select-none">
@@ -123,8 +84,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ start, due, onChange, rangeMode
         {cells.map((dayTimestamp, index) => {
           if (dayTimestamp === null) return <span key={`pad-${index}`} />;
 
-          const selected = isSelected(dayTimestamp);
-          const inRange = isInRange(dayTimestamp);
+          const selected = due !== null && sameDay(dayTimestamp, due);
           const isToday = sameDay(dayTimestamp, Date.now());
 
           return (
@@ -136,11 +96,9 @@ const DatePicker: React.FC<DatePickerProps> = ({ start, due, onChange, rangeMode
               className={`aspect-square rounded-xl text-xs font-bold transition-colors flex items-center justify-center ${
                 selected
                   ? 'bg-black/80 text-white shadow-sm'
-                  : inRange
-                    ? 'bg-black/10'
-                    : isToday
-                      ? 'ring-1 ring-black/20 hover:bg-black/5'
-                      : 'hover:bg-black/5 opacity-80 hover:opacity-100'
+                  : isToday
+                    ? 'ring-1 ring-black/20 hover:bg-black/5'
+                    : 'hover:bg-black/5 opacity-80 hover:opacity-100'
               }`}
             >
               {new Date(dayTimestamp).getDate()}

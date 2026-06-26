@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { X, Trash, Book, Book2, Notebook, Quote, Pencil, Bookmark, Typography, Search, Bulb, Heart, Circle, Bold, Italic, Underline, ChevronDown, Lock, FolderPlus, Palette, CalendarEvent, CalendarTime } from 'tabler-icons-react';
+import { X, Trash, Book, Book2, Notebook, Quote, Pencil, Bookmark, Typography, Search, Bulb, Heart, Circle, Bold, Italic, Underline, ChevronDown, Lock, FolderPlus, Palette, CalendarEvent } from 'tabler-icons-react';
 import { NoteData, Language } from '../types';
 import { COLORS, COLOR_KEYS, TITLE_ICONS, TITLE_SIZE_CLASSES, TRANSLATIONS } from '../constants';
 import StarRating from './StarRating';
 import DatePicker from './DatePicker';
 import { looksLikeBlockedRichPayload, sanitizeNoteContent } from '../utils/noteSecurity';
 import { resolveNoteColors, sanitizeNoteColor, toHexInputValue } from '../utils/noteColors';
-import { buildReminder, formatReminderShort, isReminderRange } from '../utils/reminders';
+import { buildReminder, formatReminderShort } from '../utils/reminders';
 
 interface NoteEditorProps {
   note: NoteData | null;
@@ -34,9 +34,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
   const [triggeredRatings, setTriggeredRatings] = useState<Set<number>>(new Set());
   const [pulsingId, setPulsingId] = useState<number | null>(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  // Range is a UI intent, not data-derived: a range starts before the user has
-  // picked its second date, so it must persist independently of the reminder.
-  const [isRangeMode, setIsRangeMode] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const contentEditableRef = useRef<HTMLDivElement>(null);
@@ -72,9 +69,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
       const cleanContent = sanitizeNoteContent(rawContent);
 
       contentEditableRef.current.innerHTML = cleanContent;
-
-      // Seed the range toggle from any range already stored on the note.
-      setIsRangeMode(isReminderRange(editedNote.reminder));
 
       setTimeout(() => {
         // Content loaded
@@ -558,8 +552,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
   const reminderLabel = formatReminderShort(reminder);
   const isCustomColorSelected = !COLOR_KEYS.includes(editedNote.color as any);
 
-  const updateReminder = (start: number | null, due: number | null) => {
-    handleChange('reminder', buildReminder(start, due));
+  const updateReminder = (due: number | null) => {
+    handleChange('reminder', buildReminder(null, due));
   };
 
   const openDatePicker = () => {
@@ -582,20 +576,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
     }
   };
 
-  const toggleReminderRange = () => {
-    if (isRangeMode) {
-      // Leaving range mode: keep just the end date as the single due date.
-      setIsRangeMode(false);
-      updateReminder(null, reminder?.due ?? reminder?.start ?? null);
-    } else {
-      // Entering range mode: clear the selection so the user picks start then
-      // end. The picker holds the partial selection until the range closes.
-      setIsRangeMode(true);
-      updateReminder(null, null);
-    }
-    // Make sure the calendar is visible right after toggling.
-    openDatePicker();
-  };
   const titleInputClass = isTitle ? TITLE_SIZE_CLASSES[editedNote.titleSize || 'small'] : 'text-lg md:text-3xl';
 
   const containerVariants: Variants = isMobile ? {
@@ -750,17 +730,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                       <span>{reminderLabel || t.reminderNone}</span>
                       <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform ${isDatePickerOpen ? 'rotate-180' : ''}`} />
                     </button>
-                    {!readOnly && (
-                      <button
-                        type="button"
-                        onClick={toggleReminderRange}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] md:text-xs font-bold lowercase transition-all ${isRangeMode ? 'bg-black/80 text-white' : 'border border-black/10 bg-black/5 hover:bg-black/10'}`}
-                        title={t.reminderRange}
-                      >
-                        <CalendarTime size={14} strokeWidth={2.2} />
-                        <span className="hidden md:inline">{t.reminderRange}</span>
-                      </button>
-                    )}
                   </div>
                 )}
 
@@ -1044,9 +1013,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                   className="fixed z-[50002] w-[280px] max-w-[calc(100vw-2rem)] p-3 rounded-2xl border border-black/10 shadow-2xl max-h-[60dvh] overflow-y-auto custom-scrollbar [transform:translateZ(0)]"
                 >
                   <DatePicker
-                    start={reminder?.start ?? null}
                     due={reminder?.due ?? null}
-                    rangeMode={isRangeMode}
                     onChange={updateReminder}
                   />
                 </motion.div>

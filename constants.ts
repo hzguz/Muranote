@@ -66,7 +66,6 @@ export const TRANSLATIONS = {
     addTitle: 'add title',
     addNote: 'add note',
     addReminder: 'add reminder',
-    reminderRange: 'date range',
     reminderNone: 'no date set',
     newCol: 'create new column',
     spyMode: 'spy:',
