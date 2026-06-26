@@ -191,7 +191,7 @@ const TimeField: React.FC<TimeFieldProps> = ({ label, value, disabled, onChange 
       value={value}
       disabled={disabled}
       onChange={(event) => onChange(event.target.value)}
-      className="bg-black/5 rounded-lg px-2 py-1 outline-none border border-black/5 focus:border-black/20 transition-colors disabled:cursor-not-allowed"
+      className="bg-black/5 rounded-lg px-3 py-2 md:py-1.5 outline-none border border-black/5 focus:border-black/20 transition-colors disabled:cursor-not-allowed"
     />
   </label>
 );

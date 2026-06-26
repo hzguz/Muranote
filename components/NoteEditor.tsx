@@ -37,7 +37,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
 
   const modalRef = useRef<HTMLDivElement>(null);
   const contentEditableRef = useRef<HTMLDivElement>(null);
-  const customColorInputRef = useRef<HTMLInputElement>(null);
   const lastSyncId = useRef<string | null>(null);
   const dropTargetRef = useRef<{ node: Node, position: 'before' | 'after' } | null>(null);
 
@@ -658,26 +657,25 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                         />
                       ))}
                       <div className="w-px h-5 bg-black/15 mx-1" />
-                      <motion.button
-                        whileHover={{ scale: 1.15 }}
-                        whileTap={{ scale: 0.92 }}
-                        onClick={() => customColorInputRef.current?.click()}
-                        className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${isCustomColorSelected ? 'border-current scale-110' : 'border-black/15 hover:border-black/30'}`}
+                      {/* The native color input is the visible swatch itself so a
+                          direct tap opens the OS picker on mobile (a programmatic
+                          .click() on a hidden input is blocked on iOS/Android). */}
+                      <div
+                        className={`relative w-7 h-7 rounded-full border-2 overflow-hidden transition-all ${isCustomColorSelected ? 'border-current scale-110' : 'border-black/15 hover:border-black/30'}`}
                         style={{ backgroundColor: toHexInputValue(editedNote.color) }}
-                        title="cor personalizada com tonalidade segura"
-                        aria-label="escolher cor personalizada"
                       >
-                        <Palette size={13} className="text-black/70" />
-                      </motion.button>
-                      <input
-                        ref={customColorInputRef}
-                        type="color"
-                        value={toHexInputValue(editedNote.color)}
-                        onChange={(e) => handleChange('color', sanitizeNoteColor(e.target.value, editedNote.color))}
-                        className="sr-only"
-                        tabIndex={-1}
-                        aria-hidden="true"
-                      />
+                        <input
+                          type="color"
+                          value={toHexInputValue(editedNote.color)}
+                          onChange={(e) => handleChange('color', sanitizeNoteColor(e.target.value, editedNote.color))}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          title="cor personalizada com tonalidade segura"
+                          aria-label="escolher cor personalizada"
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <Palette size={13} className="text-black/70" />
+                        </span>
+                      </div>
                     </>
                   ) : (
                     <div className="flex items-center gap-2 opacity-40 text-[10px] md:text-xs font-bold tracking-widest lowercase">
