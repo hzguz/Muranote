@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'tabler-icons-react';
 
@@ -41,6 +41,15 @@ const buildMonthGrid = (viewYear: number, viewMonth: number): (number | null)[] 
 const DatePicker: React.FC<DatePickerProps> = ({ start, due, onChange, rangeMode }) => {
   const anchor = due ?? start ?? Date.now();
   const [viewDate, setViewDate] = useState<Date>(new Date(anchor));
+  // While building a range, the first clicked day is held here until the second
+  // click closes the range. This keeps the partial selection visible even though
+  // the stored reminder collapses a lone date down to a single `due`.
+  const [pendingStart, setPendingStart] = useState<number | null>(null);
+
+  // Discard any half-finished range selection when the mode is switched off.
+  useEffect(() => {
+    if (!rangeMode) setPendingStart(null);
+  }, [rangeMode]);
 
   const viewYear = viewDate.getFullYear();
   const viewMonth = viewDate.getMonth();
@@ -59,24 +68,27 @@ const DatePicker: React.FC<DatePickerProps> = ({ start, due, onChange, rangeMode
       return;
     }
 
-    // Range mode: first click sets start, second sets due, third restarts.
-    if (start === null || due !== null) {
-      onChange(day, null);
+    // First click of a range: remember the anchor and preview it as the date.
+    if (pendingStart === null) {
+      setPendingStart(day);
+      onChange(null, day);
       return;
     }
 
-    if (day < startOfDay(start)) {
-      onChange(day, startOfDay(start));
-      return;
-    }
-    onChange(start, day);
+    // Second click: close the range (ordering handled by buildReminder upstream).
+    const rangeStart = Math.min(pendingStart, day);
+    const rangeEnd = Math.max(pendingStart, day);
+    setPendingStart(null);
+    onChange(rangeStart, rangeEnd);
   };
 
+  const effectiveStart = rangeMode ? (start ?? pendingStart) : null;
+
   const isSelected = (dayTimestamp: number): boolean =>
-    (start !== null && sameDay(dayTimestamp, start)) || (due !== null && sameDay(dayTimestamp, due));
+    (effectiveStart !== null && sameDay(dayTimestamp, effectiveStart)) || (due !== null && sameDay(dayTimestamp, due));
 
   const isInRange = (dayTimestamp: number): boolean =>
-    rangeMode && start !== null && due !== null && dayTimestamp > startOfDay(start) && dayTimestamp < startOfDay(due);
+    rangeMode && effectiveStart !== null && due !== null && dayTimestamp > startOfDay(effectiveStart) && dayTimestamp < startOfDay(due);
 
   return (
     <div className="flex flex-col gap-3 w-full select-none">

@@ -34,10 +34,17 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
   const [triggeredRatings, setTriggeredRatings] = useState<Set<number>>(new Set());
   const [pulsingId, setPulsingId] = useState<number | null>(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  // Range is a UI intent, not data-derived: a range starts before the user has
+  // picked its second date, so it must persist independently of the reminder.
+  const [isRangeMode, setIsRangeMode] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const contentEditableRef = useRef<HTMLDivElement>(null);
+  const reminderChipRef = useRef<HTMLButtonElement>(null);
   const lastSyncId = useRef<string | null>(null);
+  // Popover position is measured from the chip so the calendar can render with
+  // position:fixed, escaping the editor's overflow:hidden clipping.
+  const [datePickerPos, setDatePickerPos] = useState<{ top: number; left: number } | null>(null);
   const dropTargetRef = useRef<{ node: Node, position: 'before' | 'after' } | null>(null);
 
   useEffect(() => {
@@ -65,6 +72,9 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
       const cleanContent = sanitizeNoteContent(rawContent);
 
       contentEditableRef.current.innerHTML = cleanContent;
+
+      // Seed the range toggle from any range already stored on the note.
+      setIsRangeMode(isReminderRange(editedNote.reminder));
 
       setTimeout(() => {
         // Content loaded
@@ -545,7 +555,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
   const isTitle = editedNote.type === 'title';
   const isReminder = editedNote.type === 'reminder';
   const reminder = editedNote.reminder;
-  const rangeMode = isReminderRange(reminder);
   const reminderLabel = formatReminderShort(reminder);
   const isCustomColorSelected = !COLOR_KEYS.includes(editedNote.color as any);
 
@@ -553,14 +562,39 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
     handleChange('reminder', buildReminder(start, due));
   };
 
-  const toggleReminderRange = () => {
-    // Entering range mode seeds the start from the existing due date; leaving it
-    // collapses back to a single due date.
-    if (rangeMode) {
-      updateReminder(null, reminder?.due ?? null);
-    } else {
-      updateReminder(reminder?.due ?? Date.now(), reminder?.due ?? Date.now());
+  const openDatePicker = () => {
+    const rect = reminderChipRef.current?.getBoundingClientRect();
+    if (rect) {
+      const POPOVER_WIDTH = 280;
+      const MARGIN = 16;
+      // Keep the popover within the viewport's right edge.
+      const left = Math.min(rect.left, window.innerWidth - POPOVER_WIDTH - MARGIN);
+      setDatePickerPos({ top: rect.bottom + 8, left: Math.max(MARGIN, left) });
     }
+    setIsDatePickerOpen(true);
+  };
+
+  const toggleDatePicker = () => {
+    if (isDatePickerOpen) {
+      setIsDatePickerOpen(false);
+    } else {
+      openDatePicker();
+    }
+  };
+
+  const toggleReminderRange = () => {
+    if (isRangeMode) {
+      // Leaving range mode: keep just the end date as the single due date.
+      setIsRangeMode(false);
+      updateReminder(null, reminder?.due ?? reminder?.start ?? null);
+    } else {
+      // Entering range mode: clear the selection so the user picks start then
+      // end. The picker holds the partial selection until the range closes.
+      setIsRangeMode(true);
+      updateReminder(null, null);
+    }
+    // Make sure the calendar is visible right after toggling.
+    openDatePicker();
   };
   const titleInputClass = isTitle ? TITLE_SIZE_CLASSES[editedNote.titleSize || 'small'] : 'text-lg md:text-3xl';
 
@@ -704,51 +738,29 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                 />
 
                 {isReminder && (
-                  <div className="mt-3 md:mt-4 flex flex-col gap-2">
-                    <div className="flex items-center gap-2 flex-wrap">
+                  <div className="mt-3 md:mt-4 flex items-center gap-2 flex-wrap">
+                    <button
+                      ref={reminderChipRef}
+                      type="button"
+                      disabled={readOnly}
+                      onClick={toggleDatePicker}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/10 bg-black/5 text-xs md:text-sm font-bold lowercase transition-all ${readOnly ? 'opacity-60' : 'hover:bg-black/10'}`}
+                    >
+                      <CalendarEvent size={isMobile ? 16 : 15} strokeWidth={2.2} />
+                      <span>{reminderLabel || t.reminderNone}</span>
+                      <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform ${isDatePickerOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {!readOnly && (
                       <button
                         type="button"
-                        disabled={readOnly}
-                        onClick={() => setIsDatePickerOpen((open) => !open)}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/10 bg-black/5 text-xs md:text-sm font-bold lowercase transition-all ${readOnly ? 'opacity-60' : 'hover:bg-black/10'}`}
+                        onClick={toggleReminderRange}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] md:text-xs font-bold lowercase transition-all ${isRangeMode ? 'bg-black/80 text-white' : 'border border-black/10 bg-black/5 hover:bg-black/10'}`}
+                        title={t.reminderRange}
                       >
-                        <CalendarEvent size={isMobile ? 16 : 15} strokeWidth={2.2} />
-                        <span>{reminderLabel || t.reminderNone}</span>
-                        <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform ${isDatePickerOpen ? 'rotate-180' : ''}`} />
+                        <CalendarTime size={14} strokeWidth={2.2} />
+                        <span className="hidden md:inline">{t.reminderRange}</span>
                       </button>
-                      {!readOnly && (
-                        <button
-                          type="button"
-                          onClick={toggleReminderRange}
-                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] md:text-xs font-bold lowercase transition-all ${rangeMode ? 'bg-black/80 text-white' : 'border border-black/10 bg-black/5 hover:bg-black/10'}`}
-                          title={t.reminderRange}
-                        >
-                          <CalendarTime size={14} strokeWidth={2.2} />
-                          <span className="hidden md:inline">{t.reminderRange}</span>
-                        </button>
-                      )}
-                    </div>
-                    <AnimatePresence initial={false}>
-                      {isDatePickerOpen && !readOnly && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden"
-                        >
-                          {/* Cap height so the calendar never hides behind the
-                              mobile browser chrome; scroll internally if needed. */}
-                          <div className="mt-1 p-3 rounded-2xl border border-black/10 bg-black/[0.03] max-h-[40dvh] md:max-h-none overflow-y-auto custom-scrollbar">
-                            <DatePicker
-                              start={reminder?.start ?? null}
-                              due={reminder?.due ?? null}
-                              rangeMode={rangeMode}
-                              onChange={updateReminder}
-                            />
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    )}
                   </div>
                 )}
 
@@ -1015,6 +1027,32 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
               </motion.div>
             </motion.div>
           </motion.div>
+
+          {/* Reminder calendar popover — rendered as a sibling of the modal with
+              position:fixed so it floats above the editor's overflow:hidden. */}
+          <AnimatePresence>
+            {isReminder && isDatePickerOpen && !readOnly && datePickerPos && (
+              <>
+                <div className="fixed inset-0 z-[50001]" onClick={() => setIsDatePickerOpen(false)} />
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ top: datePickerPos.top, left: datePickerPos.left, backgroundColor: bg, color: text }}
+                  className="fixed z-[50002] w-[280px] max-w-[calc(100vw-2rem)] p-3 rounded-2xl border border-black/10 shadow-2xl max-h-[60dvh] overflow-y-auto custom-scrollbar [transform:translateZ(0)]"
+                >
+                  <DatePicker
+                    start={reminder?.start ?? null}
+                    due={reminder?.due ?? null}
+                    rangeMode={isRangeMode}
+                    onChange={updateReminder}
+                  />
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </>
       )}
     </AnimatePresence>
