@@ -371,7 +371,7 @@ const Note: React.FC<NoteProps> = ({
               </div>
               {isReminder && (
                 <span
-                  className={`flex items-center gap-1 min-w-0 text-[9px] md:text-[11px] font-bold lowercase ${reminderSealClass}`}
+                  className={`flex items-center gap-1 min-w-0 text-[9px] md:text-[11px] font-semibold lowercase ${reminderSealClass}`}
                   style={{ color: text }}
                 >
                   <CalendarEvent size={isMobile ? 10 : 12} strokeWidth={2.2} className="shrink-0" />

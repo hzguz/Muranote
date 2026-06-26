@@ -977,7 +977,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                         type="button"
                         disabled={readOnly}
                         onClick={toggleDatePicker}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/15 bg-black/5 text-xs md:text-sm font-bold lowercase transition-all ${readOnly ? 'opacity-60' : 'hover:bg-black/10'}`}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/15 bg-black/5 text-xs md:text-sm font-semibold lowercase transition-all ${readOnly ? 'opacity-60' : 'hover:bg-black/10'}`}
                         style={{ color: text }}
                       >
                         <CalendarEvent size={isMobile ? 16 : 15} strokeWidth={2.2} />

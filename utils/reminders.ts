@@ -66,16 +66,15 @@ const endOfDay = (timestamp: number): number => {
 export const isReminderRange = (reminder?: NoteReminder): boolean =>
   !!reminder && isValidTimestamp(reminder.start) && isValidTimestamp(reminder.due);
 
-/** Formats a timestamp as dd/mm/yy. */
-const formatDayMonthYear = (timestamp: number): string => {
-  const date = new Date(timestamp);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = String(date.getFullYear()).slice(-2);
-  return `${day}/${month}/${year}`;
-};
+// Day + abbreviated month + 2-digit year, localized to the device (e.g.
+// "5 jun 26" in pt-BR / en). Uses the browser locale so it adapts automatically.
+const SHORT_DATE: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: '2-digit' };
 
-/** Compact label for the card seal, e.g. "26/06/25" or "26/06/25 – 30/06/25". */
+/** Formats a timestamp as a localized "5 jun 26" style label. */
+const formatDayMonthYear = (timestamp: number): string =>
+  new Intl.DateTimeFormat(undefined, SHORT_DATE).format(timestamp);
+
+/** Compact label for the card seal, e.g. "5 jun 26" or "5 jun 26 – 9 jun 26". */
 export const formatReminderShort = (reminder?: NoteReminder): string => {
   if (!reminder || !isValidTimestamp(reminder.due)) return '';
 
