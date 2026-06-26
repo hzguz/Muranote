@@ -967,8 +967,11 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
 
               <motion.div variants={contentVariants} className="shrink-0 z-30 flex flex-col border-t-[1px] border-black/5 pb-safe" style={{ backgroundColor: bg }}>
                 <div className="py-3 px-4 md:px-7 flex justify-between items-center mb-safe">
-                  <div className="flex flex-col gap-2">
-                    {isReminder ? (
+                  <div className="flex items-center gap-3">
+                    {!isTitle && (
+                      <StarRating rating={editedNote.rating} onChange={readOnly ? undefined : (r) => handleChange('rating', r)} readonly={readOnly} size={24} gap="gap-0" color={text} stroke={stroke} pulsingId={pulsingId} />
+                    )}
+                    {isReminder && (
                       <button
                         ref={reminderChipRef}
                         type="button"
@@ -981,8 +984,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                         <span>{reminderLabel || t.reminderNone}</span>
                         <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform ${isDatePickerOpen ? 'rotate-180' : ''}`} />
                       </button>
-                    ) : !isTitle && (
-                      <StarRating rating={editedNote.rating} onChange={readOnly ? undefined : (r) => handleChange('rating', r)} readonly={readOnly} size={24} gap="gap-0" color={text} stroke={stroke} pulsingId={pulsingId} />
                     )}
                   </div>
                   {!readOnly && (

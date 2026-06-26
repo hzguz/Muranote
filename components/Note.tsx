@@ -366,7 +366,10 @@ const Note: React.FC<NoteProps> = ({
             </div>
 
             <div className="mt-1 md:mt-2 pt-1 md:pt-2 border-t border-black/5 flex justify-between items-center gap-2 opacity-80 hover:opacity-100 transition-opacity shrink-0">
-              {isReminder ? (
+              <div className="shrink-0">
+                <StarRating rating={note.rating} readonly size={isMobile ? 10 : 12} gap="gap-0" color={text} stroke={stroke} />
+              </div>
+              {isReminder && (
                 <span
                   className={`flex items-center gap-1 min-w-0 text-[9px] md:text-[11px] font-bold lowercase ${reminderSealClass}`}
                   style={{ color: text }}
@@ -374,10 +377,6 @@ const Note: React.FC<NoteProps> = ({
                   <CalendarEvent size={isMobile ? 10 : 12} strokeWidth={2.2} className="shrink-0" />
                   <span className="truncate">{reminderLabel || '...'}</span>
                 </span>
-              ) : (
-                <div className="shrink-0">
-                  <StarRating rating={note.rating} readonly size={isMobile ? 10 : 12} gap="gap-0" color={text} stroke={stroke} />
-                </div>
               )}
             </div>
           </div>
