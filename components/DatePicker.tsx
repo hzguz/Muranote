@@ -38,21 +38,6 @@ const buildMonthGrid = (viewYear: number, viewMonth: number): (number | null)[] 
   return cells;
 };
 
-/** Splits a timestamp into the "HH:MM" string the time input expects. */
-const toTimeValue = (timestamp: number | null): string => {
-  if (timestamp === null) return '00:00';
-  const date = new Date(timestamp);
-  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-};
-
-/** Applies an "HH:MM" string onto an existing day timestamp. */
-const applyTime = (dayTimestamp: number, timeValue: string): number => {
-  const [hours, minutes] = timeValue.split(':').map(Number);
-  const date = new Date(dayTimestamp);
-  date.setHours(hours || 0, minutes || 0, 0, 0);
-  return date.getTime();
-};
-
 const DatePicker: React.FC<DatePickerProps> = ({ start, due, onChange, rangeMode }) => {
   const anchor = due ?? start ?? Date.now();
   const [viewDate, setViewDate] = useState<Date>(new Date(anchor));
@@ -66,22 +51,25 @@ const DatePicker: React.FC<DatePickerProps> = ({ start, due, onChange, rangeMode
   };
 
   const handleDayClick = (dayTimestamp: number): void => {
+    // Reminders are day-granular: always normalize to the start of the day.
+    const day = startOfDay(dayTimestamp);
+
     if (!rangeMode) {
-      onChange(null, mergeDayPreservingTime(dayTimestamp, due));
+      onChange(null, day);
       return;
     }
 
     // Range mode: first click sets start, second sets due, third restarts.
     if (start === null || due !== null) {
-      onChange(mergeDayPreservingTime(dayTimestamp, start), null);
+      onChange(day, null);
       return;
     }
 
-    if (dayTimestamp < startOfDay(start)) {
-      onChange(mergeDayPreservingTime(dayTimestamp, null), mergeDayPreservingTime(start, due));
+    if (day < startOfDay(start)) {
+      onChange(day, startOfDay(start));
       return;
     }
-    onChange(start, mergeDayPreservingTime(dayTimestamp, due));
+    onChange(start, day);
   };
 
   const isSelected = (dayTimestamp: number): boolean =>
@@ -148,52 +136,8 @@ const DatePicker: React.FC<DatePickerProps> = ({ start, due, onChange, rangeMode
           );
         })}
       </div>
-
-      <div className="flex flex-col gap-2 border-t border-black/5 pt-3">
-        {rangeMode && (
-          <TimeField
-            label="start"
-            disabled={start === null}
-            value={toTimeValue(start)}
-            onChange={(time) => start !== null && onChange(applyTime(start, time), due)}
-          />
-        )}
-        <TimeField
-          label={rangeMode ? 'end' : 'time'}
-          disabled={due === null}
-          value={toTimeValue(due)}
-          onChange={(time) => due !== null && onChange(start, applyTime(due, time))}
-        />
-      </div>
     </div>
   );
 };
-
-/**
- * Carries the previous selection's time-of-day onto a newly clicked day so
- * picking a date does not silently reset the chosen hour/minute.
- */
-const mergeDayPreservingTime = (dayTimestamp: number, previous: number | null): number =>
-  previous === null ? dayTimestamp : applyTime(dayTimestamp, toTimeValue(previous));
-
-interface TimeFieldProps {
-  label: string;
-  value: string;
-  disabled: boolean;
-  onChange: (time: string) => void;
-}
-
-const TimeField: React.FC<TimeFieldProps> = ({ label, value, disabled, onChange }) => (
-  <label className={`flex items-center justify-between gap-3 text-xs font-bold lowercase ${disabled ? 'opacity-40' : 'opacity-80'}`}>
-    <span>{label}</span>
-    <input
-      type="time"
-      value={value}
-      disabled={disabled}
-      onChange={(event) => onChange(event.target.value)}
-      className="bg-black/5 rounded-lg px-3 py-2 md:py-1.5 outline-none border border-black/5 focus:border-black/20 transition-colors disabled:cursor-not-allowed"
-    />
-  </label>
-);
 
 export default DatePicker;

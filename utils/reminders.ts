@@ -67,22 +67,17 @@ export const isReminderRange = (reminder?: NoteReminder): boolean =>
   !!reminder && isValidTimestamp(reminder.start) && isValidTimestamp(reminder.due);
 
 const SHORT_DATE: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short' };
-const TIME: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
 
-/** Compact label for the card seal, e.g. "26 Jun" or "26 Jun 14:30". */
+/** Compact label for the card seal, e.g. "26 Jun" or "26 Jun – 30 Jun". */
 export const formatReminderShort = (reminder?: NoteReminder): string => {
   if (!reminder || !isValidTimestamp(reminder.due)) return '';
 
-  const due = reminder.due;
-  const datePart = new Intl.DateTimeFormat('en-US', SHORT_DATE).format(due);
-  const dueDate = new Date(due);
-  const showTime = dueDate.getHours() !== 0 || dueDate.getMinutes() !== 0;
-  const timePart = showTime ? ` ${new Intl.DateTimeFormat('en-US', TIME).format(due)}` : '';
+  const datePart = new Intl.DateTimeFormat('en-US', SHORT_DATE).format(reminder.due);
 
   if (isReminderRange(reminder)) {
     const startPart = new Intl.DateTimeFormat('en-US', SHORT_DATE).format(reminder.start!);
-    return `${startPart} – ${datePart}${timePart}`;
+    return `${startPart} – ${datePart}`;
   }
 
-  return `${datePart}${timePart}`;
+  return datePart;
 };

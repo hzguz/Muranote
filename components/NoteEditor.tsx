@@ -736,7 +736,9 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                           exit={{ height: 0, opacity: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="mt-1 p-3 rounded-2xl border border-black/10 bg-black/[0.03]">
+                          {/* Cap height so the calendar never hides behind the
+                              mobile browser chrome; scroll internally if needed. */}
+                          <div className="mt-1 p-3 rounded-2xl border border-black/10 bg-black/[0.03] max-h-[40dvh] md:max-h-none overflow-y-auto custom-scrollbar">
                             <DatePicker
                               start={reminder?.start ?? null}
                               due={reminder?.due ?? null}
