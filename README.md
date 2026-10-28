@@ -4,6 +4,8 @@ A sticky-note wall for your thoughts: drop notes anywhere on a freeform canvas, 
 
 **Live:** [muranote.vercel.app](https://muranote.vercel.app)
 
+![Muranote wall with a column of notes and free-floating sticky notes](.github/assets/banner-muranote.png)
+
 ## Features
 
 - **Freeform canvas**: drag, resize, rotate and layer notes and title cards
@@ -26,7 +28,7 @@ A sticky-note wall for your thoughts: drop notes anywhere on a freeform canvas, 
 | Build | Vite 6 |
 | Auth / database | Firebase Authentication (Google), Cloud Firestore |
 | Animation | Framer Motion |
-| Styling | Tailwind CSS |
+| Styling | Tailwind CSS 4 |
 | Icons | Lucide |
 | Hosting | Vercel (static SPA) |
 
@@ -62,6 +64,7 @@ Production builds fail if the required `VITE_FIREBASE_*` values are missing.
 | `yarn build` / `yarn preview` | Production build / preview it locally |
 | `yarn typecheck` | TypeScript check without emitting |
 | `yarn check:unused` | Report unused locals and parameters |
+| `yarn test:rules` | Run the Firestore security rules tests in the emulator (needs Java 11+) |
 | `yarn security:secrets` | Scan tracked files for leaked secrets |
 | `yarn security:audit` | Dependency vulnerability audit |
 | `yarn check:prepublish` | All of the above in sequence |
@@ -69,7 +72,7 @@ Production builds fail if the required `VITE_FIREBASE_*` values are missing.
 
 ### Firestore security rules
 
-[`firestore.rules`](firestore.rules) restricts each `users/{uid}` subtree to its owner, gives a matched partner read-only access to notes and columns, validates every payload, and reserves moderation fields for admins (custom claim). Deploy them with:
+[`firestore.rules`](firestore.rules) keeps profiles private to their owner (and the other side of a match), gives a matched partner read-only access to notes and columns, validates every payload, and reserves moderation fields for admins (custom claim). Match codes resolve through a separate `matchCodes` lookup, so no one can list users. Deploy them with:
 
 ```bash
 firebase deploy --only firestore:rules
@@ -89,10 +92,11 @@ firebase deploy --only firestore:rules
 | `users/{uid}/notes/{noteId}` | Notes and title cards |
 | `users/{uid}/columns/{columnId}` | Columns |
 | `users/{uid}/letters/{letterId}` | Expiring letters |
+| `matchCodes/{code}` | Match code → user ID lookup |
 
 ## Privacy
 
-Signed-in data lives in Firestore under your user ID. Your matched partner can read your notes and columns. Accounts with the admin claim can view any user's wall for moderation purposes, as enforced by `firestore.rules`.
+Signed-in data lives in Firestore under your user ID. Other users can't see your profile or email; your matched partner can read your notes and columns. Accounts with the admin claim can view any user's wall for moderation purposes, as enforced by `firestore.rules`.
 
 ## Project structure
 
@@ -104,6 +108,7 @@ hooks/                useOnlineStatus
 services/firebase.ts  Auth, Firestore reads/writes, match and letters
 utils/                Sanitization, reminders, colors, avatars, audio
 scripts/              Admin-claim and tracked-secret scan scripts
+tests/                Firestore security rules tests
 public/               Favicon, logo and notification sounds
 firestore.rules       Firestore security rules
 ```

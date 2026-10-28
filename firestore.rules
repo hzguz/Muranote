@@ -255,6 +255,20 @@ service cloud.firestore {
         ((!('adminPassword' in previous) && !('adminPassword' in data)) || (('adminPassword' in previous) && ('adminPassword' in data) && data.adminPassword == previous.adminPassword));
     }
 
+    // A user may flag another user's profile as "request received" only when the target is
+    // free and the requester's own profile (after this batch) points back to the target.
+    function matchRequestReceived(userId, data, previous) {
+      let requester = getAfter(userDocPath(request.auth.uid)).data;
+      return validUserPayload(data) &&
+        request.auth.uid != userId &&
+        data.diff(previous).affectedKeys().hasOnly(['matchStatus', 'matchRequestFrom']) &&
+        previous.matchStatus == 'none' &&
+        data.matchStatus == 'pending_received' &&
+        data.matchRequestFrom == request.auth.uid &&
+        requester.matchStatus == 'pending_sent' &&
+        requester.matchPartnerId == userId;
+    }
+
     function matchOnlyUpdate(data, previous) {
       return validUserPayload(data) &&
         data.diff(previous).affectedKeys().hasOnly([
@@ -268,16 +282,33 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      // Needed for match-code discovery in current client flow.
-      allow read: if isSignedIn();
+      // Profiles hold emails, so only the owner, admins and the other side of a match can read them.
+      allow read: if isAdmin() || isOwner(userId) ||
+        (isSignedIn() &&
+          (resource.data.matchPartnerId == request.auth.uid || resource.data.matchRequestFrom == request.auth.uid));
 
       allow create: if (isOwner(userId) && ownerCanCreateUser(userId, request.resource.data)) ||
         (isAdmin() && validUserPayload(request.resource.data));
 
       allow update: if (isAdmin() && validUserPayload(request.resource.data)) ||
         (isOwner(userId) && ownerCanUpdateUser(userId, request.resource.data, resource.data)) ||
-        (isSignedIn() && isMatchInvolved(userId) && matchOnlyUpdate(request.resource.data, resource.data));
+        (isSignedIn() && isMatchInvolved(userId) && matchOnlyUpdate(request.resource.data, resource.data)) ||
+        (isSignedIn() && matchRequestReceived(userId, request.resource.data, resource.data));
 
+      allow delete: if isAdmin();
+    }
+
+    // Public lookup from a 5-digit match code to a uid. Single-document reads only, so codes
+    // cannot be listed, and create-only semantics make each code unique.
+    match /matchCodes/{code} {
+      allow get: if isSignedIn();
+      allow list: if false;
+      allow create: if isSignedIn() &&
+        code.matches('^[0-9]{5}$') &&
+        request.resource.data.keys().hasOnly(['uid']) &&
+        request.resource.data.uid == request.auth.uid &&
+        getAfter(userDocPath(request.auth.uid)).data.matchCode == code;
+      allow update: if false;
       allow delete: if isAdmin();
     }
 

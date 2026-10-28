@@ -23,6 +23,7 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "check:unused": "tsc --noEmit --noUnusedLocals --noUnusedParameters",
+    "test:rules": "npx -y firebase-tools@14 emulators:exec --only firestore --project demo-muranote \"node --test tests/firestore.rules.test.mjs\"",
     "preview": "vite preview",
     "admin:claim": "node scripts/setAdminClaim.mjs",
     "security:secrets": "node scripts/checkTrackedSecrets.mjs",
@@ -40,6 +41,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@tailwindcss/vite": "^4.2.2",
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.14",

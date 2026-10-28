@@ -13,7 +13,6 @@ import {
   writeBatch,
   getDoc,
   getDocs,
-  where,
   updateDoc,
   orderBy,
   limit,
@@ -200,17 +199,29 @@ const generateMatchCode = () => {
   return Math.floor(10000 + Math.random() * 90000).toString();
 };
 
-// Match codes are looked up by value, so a duplicate would route requests to the wrong user.
+// Profiles are private, so match codes resolve through matchCodes/{code} → { uid }.
 // Sequential attempts are intentional: each one depends on the previous lookup missing.
 const generateUniqueMatchCode = async (database: Firestore): Promise<string> => {
   for (let attempt = 0; attempt < MATCH_CODE_MAX_ATTEMPTS; attempt++) {
     const candidate = generateMatchCode();
-    const existing = await getDocs(
-      query(collection(database, 'users'), where('matchCode', '==', candidate), limit(1))
-    );
-    if (existing.empty) return candidate;
+    const existing = await getDoc(doc(database, 'matchCodes', candidate));
+    if (!existing.exists()) return candidate;
   }
   throw new Error('Could not generate a unique match code.');
+};
+
+// Backfills the lookup entry for profiles created before matchCodes existed, and
+// reassigns legacy duplicated codes so each code resolves to exactly one user.
+const ensureMatchCodeClaim = async (database: Firestore, userId: string, currentCode: string) => {
+  const claimSnap = await getDoc(doc(database, 'matchCodes', currentCode));
+  if (claimSnap.exists() && claimSnap.data().uid === userId) return;
+
+  let code = currentCode;
+  if (claimSnap.exists()) {
+    code = await generateUniqueMatchCode(database);
+    await updateDoc(doc(database, 'users', userId), { matchCode: code });
+  }
+  await setDoc(doc(database, 'matchCodes', code), { uid: userId });
 };
 
 export const initializeUserProfile = async (user: User) => {
@@ -219,7 +230,10 @@ export const initializeUserProfile = async (user: User) => {
   const snap = await getDoc(userRef);
   const defaultAvatar = getDefaultAvatarIdFromUid(user.uid);
 
+  let matchCode: string;
+
   if (!snap.exists()) {
+    matchCode = await generateUniqueMatchCode(database);
     const profile: UserProfile = {
       uid: user.uid,
       email: user.email || '',
@@ -228,7 +242,7 @@ export const initializeUserProfile = async (user: User) => {
       avatarId: defaultAvatar,
       noteColorPreference: DEFAULT_TYPE_COLORS.note,
       titleColorPreference: DEFAULT_TYPE_COLORS.title,
-      matchCode: await generateUniqueMatchCode(database),
+      matchCode,
       matchStatus: 'none',
     };
     await setDoc(userRef, profile);
@@ -237,13 +251,21 @@ export const initializeUserProfile = async (user: User) => {
     const updates: Record<string, any> = {};
     const safeNotePref = sanitizeNoteColor(data.noteColorPreference, DEFAULT_TYPE_COLORS.note);
     const safeTitlePref = sanitizeNoteColor(data.titleColorPreference, DEFAULT_TYPE_COLORS.title);
-    if (!data.matchCode) updates.matchCode = await generateUniqueMatchCode(database);
+    matchCode = data.matchCode || await generateUniqueMatchCode(database);
+    if (!data.matchCode) updates.matchCode = matchCode;
     if (!isAvatarId(data.avatarId)) updates.avatarId = defaultAvatar;
     if (data.noteColorPreference !== safeNotePref) updates.noteColorPreference = safeNotePref;
     if (data.titleColorPreference !== safeTitlePref) updates.titleColorPreference = safeTitlePref;
     if (Object.keys(updates).length > 0) {
       await updateDoc(userRef, updates);
     }
+  }
+
+  // Non-fatal: a missing claim only makes the user unfindable by code until the next sign-in.
+  try {
+    await ensureMatchCodeClaim(database, user.uid, matchCode);
+  } catch (error) {
+    console.warn('Could not claim match code:', error);
   }
 };
 
@@ -305,30 +327,23 @@ export const unbanUser = async (userId: string) => {
 export const sendMatchRequest = async (currentUserId: string, targetCode: string) => {
   const database = assertDbConfigured();
 
-  const q = query(collection(database, 'users'), where('matchCode', '==', targetCode));
-  const querySnapshot = await getDocs(q);
-
-  if (querySnapshot.empty) {
+  const claimSnap = await getDoc(doc(database, 'matchCodes', targetCode));
+  if (!claimSnap.exists()) {
     throw new Error('Código não encontrado.');
   }
 
-  const targetDoc = querySnapshot.docs[0];
-  const targetUser = targetDoc.data() as UserProfile;
-
-  if (targetUser.uid === currentUserId) {
+  const targetUserId = claimSnap.data().uid as string;
+  if (targetUserId === currentUserId) {
     throw new Error('Você não pode dar match com você mesmo.');
-  }
-  if (targetUser.matchStatus === 'matched') {
-    throw new Error('Este usuário já tem um match.');
   }
 
   const batch = writeBatch(database);
   const currentUserRef = doc(database, 'users', currentUserId);
-  const targetUserRef = doc(database, 'users', targetUser.uid);
+  const targetUserRef = doc(database, 'users', targetUserId);
 
   batch.update(currentUserRef, {
     matchStatus: 'pending_sent',
-    matchPartnerId: targetUser.uid,
+    matchPartnerId: targetUserId,
   });
 
   batch.update(targetUserRef, {
@@ -336,7 +351,13 @@ export const sendMatchRequest = async (currentUserId: string, targetCode: string
     matchRequestFrom: currentUserId,
   });
 
-  await batch.commit();
+  // The target profile is private, so availability is enforced by the security rules:
+  // the write is rejected when the target already has a match or a pending request.
+  try {
+    await batch.commit();
+  } catch {
+    throw new Error('Este usuário não está disponível para match.');
+  }
 };
 
 export const acceptMatchRequest = async (currentUserId: string, requesterId: string) => {
