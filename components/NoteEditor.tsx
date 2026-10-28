@@ -725,21 +725,21 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                   value={editedNote.title}
                   onChange={(e) => handleChange('title', e.target.value)}
                   placeholder={isTitle ? t.titlePlaceholder : t.titleDef}
-                  className={`${titleInputClass} font-bold bg-transparent border-none outline-none placeholder-current opacity-90 w-full transition-all duration-300 select-text flex-shrink-0 mt-2`}
+                  className={`${titleInputClass} font-bold bg-transparent border-none outline-hidden placeholder-current opacity-90 w-full transition-all duration-300 select-text shrink-0 mt-2`}
                 />
 
                 {!isTitle && !readOnly && (
                   <div className="flex items-center gap-2 mt-4 md:mt-6 border-[1px] border-black/10 rounded-2xl p-1.5 w-fit bg-black/5">
-                    <button onMouseDown={(e) => { e.preventDefault(); execFormat('bold'); }} className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all ${activeFormats.bold ? 'bg-black/10 opacity-100 ring-1 ring-black/5 shadow-sm' : 'hover:bg-black/5 opacity-60 hover:opacity-100'}`} title="bold"><Bold size={isMobile ? 18 : 16} strokeWidth={activeFormats.bold ? 3 : 2.5} /></button>
-                    <button onMouseDown={(e) => { e.preventDefault(); execFormat('italic'); }} className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all ${activeFormats.italic ? 'bg-black/10 opacity-100 ring-1 ring-black/5 shadow-sm' : 'hover:bg-black/5 opacity-60 hover:opacity-100'}`} title="italic"><Italic size={isMobile ? 18 : 16} strokeWidth={activeFormats.italic ? 3 : 2.5} /></button>
-                    <button onMouseDown={(e) => { e.preventDefault(); execFormat('underline'); }} className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all ${activeFormats.underline ? 'bg-black/10 opacity-100 ring-1 ring-black/5 shadow-sm' : 'hover:bg-black/5 opacity-60 hover:opacity-100'}`} title="underline"><Underline size={isMobile ? 18 : 16} strokeWidth={activeFormats.underline ? 3 : 2.5} /></button>
+                    <button onMouseDown={(e) => { e.preventDefault(); execFormat('bold'); }} className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all ${activeFormats.bold ? 'bg-black/10 opacity-100 ring-1 ring-black/5 shadow-xs' : 'hover:bg-black/5 opacity-60 hover:opacity-100'}`} title="bold"><Bold size={isMobile ? 18 : 16} strokeWidth={activeFormats.bold ? 3 : 2.5} /></button>
+                    <button onMouseDown={(e) => { e.preventDefault(); execFormat('italic'); }} className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all ${activeFormats.italic ? 'bg-black/10 opacity-100 ring-1 ring-black/5 shadow-xs' : 'hover:bg-black/5 opacity-60 hover:opacity-100'}`} title="italic"><Italic size={isMobile ? 18 : 16} strokeWidth={activeFormats.italic ? 3 : 2.5} /></button>
+                    <button onMouseDown={(e) => { e.preventDefault(); execFormat('underline'); }} className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all ${activeFormats.underline ? 'bg-black/10 opacity-100 ring-1 ring-black/5 shadow-xs' : 'hover:bg-black/5 opacity-60 hover:opacity-100'}`} title="underline"><Underline size={isMobile ? 18 : 16} strokeWidth={activeFormats.underline ? 3 : 2.5} /></button>
                     <div className="w-[1px] h-4 bg-black/10 mx-1"></div>
                     <button onMouseDown={(e) => { e.preventDefault(); createGroup(); }} className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all hover:bg-black/5 opacity-60 hover:opacity-100 flex items-center gap-1.5`} title={t.createGroup}><FolderPlus size={isMobile ? 18 : 16} strokeWidth={2.5} /><span className="text-[11px] font-bold lowercase tracking-wide hidden md:inline">{t.createGroup}</span></button>
                   </div>
                 )}
               </motion.div>
 
-              <motion.div ref={scrollContainerRef} variants={contentVariants} className="flex-grow overflow-y-auto overflow-x-hidden custom-scrollbar relative bg-black/[0.01]">
+              <motion.div ref={scrollContainerRef} variants={contentVariants} className="grow overflow-y-auto overflow-x-hidden custom-scrollbar relative bg-black/[0.01]">
                 <div className="p-4 md:p-7 pt-5 md:pt-6 min-h-full flex flex-col">
 
                   {!isTitle && (
@@ -931,14 +931,14 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                         e.preventDefault();
                         e.stopPropagation();
                       }}
-                      className={`w-full flex-grow text-[15px] md:text-[17px] leading-relaxed bg-transparent border-none outline-none resize-none transition-opacity empty:before:content-[attr(data-placeholder)] empty:before:opacity-50 select-text min-h-[50vh] ${readOnly ? 'opacity-80 cursor-default' : 'opacity-90 focus:opacity-100 cursor-text'}`}
+                      className={`w-full grow text-[15px] md:text-[17px] leading-relaxed bg-transparent border-none outline-hidden resize-none transition-opacity empty:before:content-[attr(data-placeholder)] empty:before:opacity-50 select-text min-h-[50vh] ${readOnly ? 'opacity-80 cursor-default' : 'opacity-90 focus:opacity-100 cursor-text'}`}
                       data-placeholder={t.writeThoughts}
                       style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', outline: 'none', position: 'relative' }}
                     />
                   )}
 
                   {isTitle && (
-                    <div className="flex-grow">
+                    <div className="grow">
                       <span className="text-xs md:text-sm font-bold opacity-60 lowercase pl-1 block mb-2">{readOnly ? 'selected icon' : t.selectIcon}</span>
                       <div className="border-[1px] border-black/10 rounded-2xl p-3 md:p-4 bg-white/10">
                         <div className="grid grid-cols-5 gap-2 md:gap-3">
@@ -951,7 +951,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                                 key={iconName}
                                 disabled={readOnly}
                                 onClick={() => handleChange('icon', iconName)}
-                                className={`p-3 md:p-4 rounded-xl flex items-center justify-center transition-all ${isSelected ? 'bg-black/5 ring-1 ring-black/10 shadow-sm scale-105' : 'hover:bg-black/5 opacity-70 hover:opacity-100'}`}
+                                className={`p-3 md:p-4 rounded-xl flex items-center justify-center transition-all ${isSelected ? 'bg-black/5 ring-1 ring-black/10 shadow-xs scale-105' : 'hover:bg-black/5 opacity-70 hover:opacity-100'}`}
                               >
                                 <IconComp size={isMobile ? 24 : 32} strokeWidth={stroke} />
                               </button>

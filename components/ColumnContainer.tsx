@@ -157,7 +157,7 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
                         {isEditingTitle ? (
                             <input
                                 autoFocus
-                                className="bg-transparent border-b border-primary/20 outline-none font-bold text-primary-dark lowercase max-w-[200px]"
+                                className="bg-transparent border-b border-primary/20 outline-hidden font-bold text-primary-dark lowercase max-w-[200px]"
                                 value={tempTitle}
                                 onChange={(e) => setTempTitle(e.target.value)}
                                 onBlur={handleTitleBlur}
@@ -166,15 +166,15 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
                         ) : (
                             <h2
                                 onClick={() => !isReadOnly && setIsEditingTitle(true)}
-                                className="font-bold text-primary-dark lowercase cursor-text select-none truncate max-w-[200px] hover:bg-black/5 rounded px-1 transition-colors"
+                                className="font-bold text-primary-dark lowercase cursor-text select-none truncate max-w-[200px] hover:bg-black/5 rounded-sm px-1 transition-colors"
                             >
                                 {column.title}
                             </h2>
                         )}
                     </div>
                 </div>
-                <div className="w-full px-4 flex-grow flex flex-col pb-4">
-                    <div data-column-id={column.id} className={`grid grid-cols-2 gap-3 relative w-full flex-grow content-start pb-4 p-3 border rounded-2xl transition-colors duration-200 ${isDragTarget ? 'border-[#a8b5a0]/50 bg-[#e8ece6]/50' : 'border-primary/10 bg-white/50'}`}>
+                <div className="w-full px-4 grow flex flex-col pb-4">
+                    <div data-column-id={column.id} className={`grid grid-cols-2 gap-3 relative w-full grow content-start pb-4 p-3 border rounded-2xl transition-colors duration-200 ${isDragTarget ? 'border-[#a8b5a0]/50 bg-[#e8ece6]/50' : 'border-primary/10 bg-white/50'}`}>
                         <AnimatePresence mode="sync">
                             {notes.map(renderNote)}
                         </AnimatePresence>
@@ -222,7 +222,7 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
             className={`bg-white/95 rounded-3xl border p-4 shadow-lg cursor-grab active:cursor-grabbing active:shadow-2xl transition-shadow border-primary/10`}
         >
             <div className="flex justify-between items-center mb-3 px-1 group/title">
-                <div className="flex items-center gap-3 flex-grow">
+                <div className="flex items-center gap-3 grow">
                     {/* Icon Button */}
                     <div className="relative" ref={iconPickerRef}>
                         <button
@@ -268,7 +268,7 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
                     {isEditingTitle ? (
                         <input
                             autoFocus
-                            className="bg-transparent border-b border-primary/30 outline-none flex-grow font-bold text-base text-primary-dark lowercase"
+                            className="bg-transparent border-b border-primary/30 outline-hidden grow font-bold text-base text-primary-dark lowercase"
                             value={tempTitle}
                             onChange={(e) => setTempTitle(e.target.value)}
                             onBlur={handleTitleBlur}
@@ -277,7 +277,7 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
                     ) : (
                         <h2
                             onClick={() => !isReadOnly && setIsEditingTitle(true)}
-                            className="font-bold text-base text-primary-dark lowercase cursor-text select-none tracking-tight hover:bg-black/5 rounded px-1 transition-colors"
+                            className="font-bold text-base text-primary-dark lowercase cursor-text select-none tracking-tight hover:bg-black/5 rounded-sm px-1 transition-colors"
                         >
                             {column.title}
                         </h2>

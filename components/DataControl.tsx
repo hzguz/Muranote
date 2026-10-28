@@ -198,7 +198,7 @@ const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImp
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-[50000] flex items-center justify-center p-4 [transform:translateZ(0)]"
+        className="fixed inset-0 bg-primary/20 backdrop-blur-xs z-[50000] flex items-center justify-center p-4 [transform:translateZ(0)]"
       >
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
@@ -223,10 +223,10 @@ const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImp
               {user ? (
                 <div className="flex flex-col gap-4">
                   {/* MATCH INTERFACE */}
-                  <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative min-h-[120px]">
+                  <div className="bg-white rounded-3xl shadow-xs border border-gray-100 overflow-hidden relative min-h-[120px]">
                     {/* LOADING STATE */}
                     {!userProfile && (
-                      <div className="absolute inset-0 z-20 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                      <div className="absolute inset-0 z-20 bg-white/80 backdrop-blur-xs flex items-center justify-center">
                         <div className="flex flex-col items-center gap-2">
                           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
                           <span className="text-[10px] text-gray-400 font-bold lowercase">{t.loadingProfile}</span>
@@ -298,8 +298,8 @@ const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImp
                           <div className="flex flex-col items-center justify-center h-full gap-2 bg-yellow-50 p-2 rounded-xl border border-yellow-100 w-full">
                             <p className="text-[10px] font-bold text-yellow-700 leading-tight">{t.matchRequest}</p>
                             <div className="flex gap-2">
-                              <button onClick={handleAccept} className="bg-primary text-white p-1.5 rounded-full hover:bg-primary-dark shadow-sm"><Check size={14} /></button>
-                              <button onClick={handleDecline} className="bg-white text-red-400 p-1.5 rounded-full hover:bg-red-50 shadow-sm border border-red-100"><X size={14} /></button>
+                              <button onClick={handleAccept} className="bg-primary text-white p-1.5 rounded-full hover:bg-primary-dark shadow-xs"><Check size={14} /></button>
+                              <button onClick={handleDecline} className="bg-white text-red-400 p-1.5 rounded-full hover:bg-red-50 shadow-xs border border-red-100"><X size={14} /></button>
                             </div>
                           </div>
                         )}
@@ -317,7 +317,7 @@ const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImp
                                 maxLength={5}
                                 value={partnerCode}
                                 onChange={(e) => setPartnerCode(e.target.value.replace(/\D/g, ''))}
-                                className="w-full text-center text-xs border border-gray-200 rounded-lg py-1.5 mb-1 bg-gray-50 focus:bg-white focus:ring-2 ring-primary/20 outline-none"
+                                className="w-full text-center text-xs border border-gray-200 rounded-lg py-1.5 mb-1 bg-gray-50 focus:bg-white focus:ring-2 ring-primary/20 outline-hidden"
                               />
                               <button
                                 onClick={handleSendMatchRequest}
@@ -367,7 +367,7 @@ const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImp
                   whileHover={{ scale: 1.02 }}
                   className="bg-primary/5 p-6 rounded-3xl border border-primary/10 flex flex-col items-center text-center gap-3 relative overflow-hidden"
                 >
-                  <div className="bg-white p-3 rounded-full shadow-sm mb-1 z-10">
+                  <div className="bg-white p-3 rounded-full shadow-xs mb-1 z-10">
                     <GoogleIcon size={28} />
                   </div>
                   <div className="z-10">
@@ -377,7 +377,7 @@ const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImp
 
                   <button
                     onClick={onLogin}
-                    className="w-full mt-2 flex items-center justify-center gap-3 bg-primary hover:bg-primary-dark text-white font-bold py-3.5 rounded-2xl shadow-sm transition-all lowercase group z-10"
+                    className="w-full mt-2 flex items-center justify-center gap-3 bg-primary hover:bg-primary-dark text-white font-bold py-3.5 rounded-2xl shadow-xs transition-all lowercase group z-10"
                   >
                     <span className="text-sm">{t.enterNow}</span>
                   </button>
@@ -408,9 +408,9 @@ const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImp
 
             {/* SEPARATOR */}
             <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-gray-200"></div>
-              <span className="flex-shrink-0 mx-4 text-gray-300 text-[10px] lowercase font-bold">{t.localBackup}</span>
-              <div className="flex-grow border-t border-gray-200"></div>
+              <div className="grow border-t border-gray-200"></div>
+              <span className="shrink-0 mx-4 text-gray-300 text-[10px] lowercase font-bold">{t.localBackup}</span>
+              <div className="grow border-t border-gray-200"></div>
             </div>
 
             {/* BACKUP ACTIONS */}

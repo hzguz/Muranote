@@ -61,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({
     }, []);
 
     return (
-        <header className="fixed top-0 left-0 right-0 h-16 shadow-sm z-[40000] flex items-center justify-between px-6 border-b pointer-events-auto transition-colors duration-300" style={{ backgroundColor: 'var(--header-bg)', borderColor: 'var(--border-color)' }}>
+        <header className="fixed top-0 left-0 right-0 h-16 shadow-xs z-[40000] flex items-center justify-between px-6 border-b pointer-events-auto transition-colors duration-300" style={{ backgroundColor: 'var(--header-bg)', borderColor: 'var(--border-color)' }}>
             <div
                 className="flex items-center gap-2 md:gap-3 cursor-default"
                 onMouseEnter={handleLogoEnter}
@@ -177,7 +177,7 @@ const Header: React.FC<HeaderProps> = ({
                         whileHover={{ scale: 1.1, backgroundColor: "#333" }}
                         whileTap={{ scale: 0.95 }}
                         onClick={onOpenAdminPanel}
-                        className="p-2 md:p-2.5 bg-black text-green-400 rounded-full transition-colors flex items-center justify-center shadow-sm relative mr-1 border border-green-900"
+                        className="p-2 md:p-2.5 bg-black text-green-400 rounded-full transition-colors flex items-center justify-center shadow-xs relative mr-1 border border-green-900"
                         title={t.adminConsole}
                     >
                         <ShieldCheck size={20} strokeWidth={currentStroke} />
@@ -189,7 +189,7 @@ const Header: React.FC<HeaderProps> = ({
                         whileHover={{ scale: 1.05, backgroundColor: "rgba(249, 250, 251, 1)" }}
                         whileTap={{ scale: 0.95 }}
                         onClick={onOpenDataModal}
-                        className="p-2 md:p-2.5 bg-white text-primary rounded-full transition-colors flex items-center justify-center shadow-sm relative hover:bg-gray-50"
+                        className="p-2 md:p-2.5 bg-white text-primary rounded-full transition-colors flex items-center justify-center shadow-xs relative hover:bg-gray-50"
                         title={t.myProfile}
                     >
                         {userProfile?.matchStatus === 'pending_received' && (
@@ -202,7 +202,7 @@ const Header: React.FC<HeaderProps> = ({
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={onOpenDataModal}
-                        className="px-4 py-2 text-primary bg-white rounded-full font-bold text-xs md:text-sm flex items-center gap-2 shadow-sm lowercase hover:bg-gray-50 transition-colors"
+                        className="px-4 py-2 text-primary bg-white rounded-full font-bold text-xs md:text-sm flex items-center gap-2 shadow-xs lowercase hover:bg-gray-50 transition-colors"
                     >
                         <Login size={18} strokeWidth={currentStroke} />
                         <span className="inline leading-none pt-[1px]">{t.signIn}</span>

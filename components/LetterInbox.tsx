@@ -147,7 +147,7 @@ const LetterInbox: React.FC<LetterInboxProps> = ({ letters, isOnline, onDelete, 
 
               {/* Badge de quantidade */}
               {visibleLetters.length > 1 && (
-                <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center border-2 border-white shadow z-20">
+                <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center border-2 border-white shadow-sm z-20">
                   {visibleLetters.length}
                 </span>
               )}
@@ -164,7 +164,7 @@ const LetterInbox: React.FC<LetterInboxProps> = ({ letters, isOnline, onDelete, 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60000] bg-black/45 backdrop-blur-sm flex items-center justify-center p-4 [transform:translateZ(0)]"
+            className="fixed inset-0 z-[60000] bg-black/45 backdrop-blur-xs flex items-center justify-center p-4 [transform:translateZ(0)]"
             onClick={handleClose}
           >
             <motion.div

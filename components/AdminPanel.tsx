@@ -240,29 +240,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose, user, notes, o
                         </button>
                     </div>
 
-                    <div className="flex-grow overflow-y-auto p-6 custom-scrollbar">
+                    <div className="grow overflow-y-auto p-6 custom-scrollbar">
                         {activeTab === 'tools' && (
                             <div className="space-y-4">
                                 <div className="text-xs text-gray-500 mb-4 pb-4 border-b border-gray-800 flex justify-between items-center">
                                     <div>
                                         <p>ADMIN CLAIM: {user.email}</p>
                                     </div>
-                                    <div className="flex items-center gap-1 text-green-500 bg-green-900/20 px-2 py-1 rounded text-[10px] font-bold border border-green-900/30">
+                                    <div className="flex items-center gap-1 text-green-500 bg-green-900/20 px-2 py-1 rounded-sm text-[10px] font-bold border border-green-900/30">
                                         <Check size={10} /> AUTHORIZED
                                     </div>
                                 </div>
 
                                 <div className="grid gap-3">
                                     <button onClick={handleGenerateNotes} disabled={isLoading} className="flex items-center gap-3 bg-gray-800 hover:bg-gray-700 p-3 rounded-lg border border-gray-700 transition-colors group">
-                                        <div className="bg-blue-500/20 text-blue-400 p-2 rounded group-hover:bg-blue-500 group-hover:text-white transition-colors"><Database size={18} /></div>
+                                        <div className="bg-blue-500/20 text-blue-400 p-2 rounded-sm group-hover:bg-blue-500 group-hover:text-white transition-colors"><Database size={18} /></div>
                                         <div className="text-left"><div className="text-sm font-bold text-gray-300">{t.genNotes}</div><div className="text-[10px] text-gray-500">Stress test grid layout</div></div>
                                     </button>
                                     <button onClick={handleResetProfile} disabled={isLoading} className="flex items-center gap-3 bg-gray-800 hover:bg-gray-700 p-3 rounded-lg border border-gray-700 transition-colors group">
-                                        <div className="bg-yellow-500/20 text-yellow-400 p-2 rounded group-hover:bg-yellow-500 group-hover:text-white transition-colors"><Refresh size={18} /></div>
+                                        <div className="bg-yellow-500/20 text-yellow-400 p-2 rounded-sm group-hover:bg-yellow-500 group-hover:text-white transition-colors"><Refresh size={18} /></div>
                                         <div className="text-left"><div className="text-sm font-bold text-gray-300">{t.resetMatch}</div><div className="text-[10px] text-gray-500">Forçar status para 'none'</div></div>
                                     </button>
                                     <button onClick={handleNukeNotes} disabled={isLoading} className="flex items-center gap-3 bg-red-900/20 hover:bg-red-900/40 p-3 rounded-lg border border-red-900/50 transition-colors group">
-                                        <div className="bg-red-500/20 text-red-400 p-2 rounded group-hover:bg-red-500 group-hover:text-white transition-colors"><Trash size={18} /></div>
+                                        <div className="bg-red-500/20 text-red-400 p-2 rounded-sm group-hover:bg-red-500 group-hover:text-white transition-colors"><Trash size={18} /></div>
                                         <div className="text-left"><div className="text-sm font-bold text-red-300">{t.nukeNotes}</div><div className="text-[10px] text-red-400">Limpar DB do usuário atual</div></div>
                                     </button>
                                 </div>
@@ -290,8 +290,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose, user, notes, o
                                                     <div>
                                                         <div className="text-xs font-bold text-white flex items-center gap-2">
                                                             {u.displayName}
-                                                            <span className="text-[10px] font-normal text-gray-500 bg-gray-900 px-1.5 rounded">{u.matchCode}</span>
-                                                            {u.isBanned && <span className="text-[10px] font-bold text-red-400 bg-red-900/50 px-1.5 rounded">BANIDO</span>}
+                                                            <span className="text-[10px] font-normal text-gray-500 bg-gray-900 px-1.5 rounded-sm">{u.matchCode}</span>
+                                                            {u.isBanned && <span className="text-[10px] font-bold text-red-400 bg-red-900/50 px-1.5 rounded-sm">BANIDO</span>}
                                                         </div>
                                                         <div className="text-[10px] text-gray-500">{u.email}</div>
                                                     </div>
@@ -345,14 +345,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose, user, notes, o
                                                                 onChange={(e) => setLetterMessage(e.target.value.slice(0, 2000))}
                                                                 placeholder="mensagem da carta..."
                                                                 rows={3}
-                                                                className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-200 resize-none outline-none focus:border-amber-500 transition-colors"
+                                                                className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-200 resize-none outline-hidden focus:border-amber-500 transition-colors"
                                                             />
                                                             <div className="flex gap-1 flex-wrap">
                                                                 {LETTER_SEAL_ICONS.map((icon) => (
                                                                     <button
                                                                         key={icon}
                                                                         onClick={() => setLetterSeal(icon)}
-                                                                        className={`px-2 py-1 rounded text-[10px] font-bold transition-colors ${letterSeal === icon ? 'bg-amber-600 text-white' : 'bg-gray-900 text-gray-400 hover:bg-gray-700'}`}
+                                                                        className={`px-2 py-1 rounded-sm text-[10px] font-bold transition-colors ${letterSeal === icon ? 'bg-amber-600 text-white' : 'bg-gray-900 text-gray-400 hover:bg-gray-700'}`}
                                                                     >
                                                                         {icon}
                                                                     </button>

@@ -77,7 +77,7 @@ const LetterComposer: React.FC<LetterComposerProps> = ({ isOpen, partnerName, on
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60000] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 [transform:translateZ(0)]"
+          className="fixed inset-0 z-[60000] bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 [transform:translateZ(0)]"
           onClick={() => !isSending && onClose()}
         >
           <motion.form
@@ -121,7 +121,7 @@ const LetterComposer: React.FC<LetterComposerProps> = ({ isOpen, partnerName, on
                   value={message}
                   onChange={(event) => setMessage(event.target.value.slice(0, LETTER_MAX_MESSAGE_LENGTH))}
                   placeholder="escreva algo que mereça um envelope..."
-                  className="w-full h-40 resize-none rounded-3xl border border-amber-100 bg-white/80 px-4 py-4 text-sm text-gray-800 outline-none focus:ring-4 focus:ring-amber-200/60 focus:border-amber-300 transition-all shadow-inner"
+                  className="w-full h-40 resize-none rounded-3xl border border-amber-100 bg-white/80 px-4 py-4 text-sm text-gray-800 outline-hidden focus:ring-4 focus:ring-amber-200/60 focus:border-amber-300 transition-all shadow-inner"
                 />
                 <div className="mt-2 flex items-center justify-between text-[10px] font-bold lowercase">
                   <span className={error ? 'text-red-500' : 'text-gray-400'}>{error || 'será apagada após a leitura.'}</span>
@@ -144,7 +144,7 @@ const LetterComposer: React.FC<LetterComposerProps> = ({ isOpen, partnerName, on
                         onClick={() => setSealIcon(iconName)}
                         className={`h-12 rounded-2xl border flex items-center justify-center transition-all ${
                           selected
-                            ? 'bg-amber-200 border-amber-300 text-amber-900 shadow-sm scale-[1.02]'
+                            ? 'bg-amber-200 border-amber-300 text-amber-900 shadow-xs scale-[1.02]'
                             : 'bg-white/80 border-amber-100 text-gray-400 hover:text-amber-700 hover:border-amber-200'
                         }`}
                         aria-label={`selo ${iconName}`}

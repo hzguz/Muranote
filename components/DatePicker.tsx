@@ -95,7 +95,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ due, onChange }) => {
               onClick={() => handleDayClick(dayTimestamp)}
               className={`aspect-square rounded-xl text-xs font-bold transition-colors flex items-center justify-center ${
                 selected
-                  ? 'bg-black/80 text-white shadow-sm'
+                  ? 'bg-black/80 text-white shadow-xs'
                   : isToday
                     ? 'ring-1 ring-black/20 hover:bg-black/5'
                     : 'hover:bg-black/5 opacity-80 hover:opacity-100'

@@ -24,8 +24,8 @@ const NoteSkeleton: React.FC<NoteSkeletonProps> = ({ count = 3, isTitle = false 
                     <div className="p-3 h-full flex flex-col justify-between">
                         {/* Title skeleton */}
                         <div className="space-y-2">
-                            <div className="h-3 bg-gray-300/50 rounded w-3/4" />
-                            <div className="h-2 bg-gray-300/30 rounded w-1/2" />
+                            <div className="h-3 bg-gray-300/50 rounded-sm w-3/4" />
+                            <div className="h-2 bg-gray-300/30 rounded-sm w-1/2" />
                         </div>
 
                         {/* Icon skeleton */}

@@ -53,7 +53,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onCancel}
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60000] flex items-center justify-center p-4 [transform:translateZ(0)]"
+                    className="fixed inset-0 bg-black/40 backdrop-blur-xs z-[60000] flex items-center justify-center p-4 [transform:translateZ(0)]"
                 >
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}

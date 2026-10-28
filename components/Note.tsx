@@ -355,12 +355,12 @@ const Note: React.FC<NoteProps> = ({
           <div className="absolute top-0 right-0 z-20" style={{ width: `${foldSize}px`, height: `${foldSize}px`, backgroundColor: dark, borderRadius: '0 0 0 8px' }} />
           <div className="absolute top-0 right-0 z-20 pointer-events-none opacity-20" style={{ width: `${foldSize}px`, height: `${foldSize}px`, borderRadius: '0 0 0 8px', background: 'linear-gradient(45deg, transparent 0%, #000 100%)' }} />
           <div className={`w-full p-3 md:p-7 flex flex-col overflow-hidden h-full`}>
-            <h3 className="font-bold text-sm md:text-xl mb-1 md:mb-3 leading-tight pr-6 break-words line-clamp-2 opacity-90 pt-1 shrink-0">
+            <h3 className="font-bold text-sm md:text-xl mb-1 md:mb-3 leading-tight md:leading-7 pr-6 break-words line-clamp-2 opacity-90 pt-1 shrink-0">
               {displayTitle}
             </h3>
 
-            <div className="flex-grow overflow-hidden my-1 pr-1">
-              <p className="text-sm md:text-base opacity-75 whitespace-pre-wrap leading-snug break-words line-clamp-3">
+            <div className="grow overflow-hidden my-1 pr-1">
+              <p className="text-sm md:text-base opacity-75 whitespace-pre-wrap leading-snug md:leading-6 break-words line-clamp-3">
                 {previewContent}
               </p>
             </div>
