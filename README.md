@@ -114,10 +114,3 @@ firestore.rules       Firestore security rules
 ## License
 
 [MIT](LICENSE)
-
-## Author
-
-**Gustavo Soares**, designer and front-end developer at **GsStudio**
-
-- Portfolio: [gustasoares.com](https://gustasoares.com)
-- GitHub: [@hzguz](https://github.com/hzguz)
