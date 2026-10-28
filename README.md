@@ -2,8 +2,6 @@
 
 A sticky-note wall for your thoughts: drop notes anywhere on a freeform canvas, group them into columns, add reminders, and sync across devices with your Google account.
 
-**Live:** [muranote.vercel.app](https://muranote.vercel.app)
-
 ![Muranote wall with a column of notes and free-floating sticky notes](.github/assets/banner-muranote.png)
 
 ## Features
