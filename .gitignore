@@ -43,6 +43,3 @@ coverage/
 
 # Local/internal docs
 docs/
-
-# Firebase Firestore Rules (deployment-specific, should not be committed)
-firestore.rules

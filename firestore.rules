@@ -1,0 +1,311 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userDocPath(userId) {
+      return /databases/$(database)/documents/users/$(userId);
+    }
+
+    function hasUserDoc(userId) {
+      return exists(userDocPath(userId));
+    }
+
+    function userData(userId) {
+      return get(userDocPath(userId)).data;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Admin via Firebase Custom Claims
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function isMatchInvolved(userId) {
+      let target = userData(userId);
+      return target.matchRequestFrom == request.auth.uid || target.matchPartnerId == request.auth.uid;
+    }
+
+    function isValidNumber(v) {
+      return v is int || v is float;
+    }
+
+    // Allows only tone-limited HEX (#RRGGBB) where each channel is between 0x40 and 0xEF.
+    function isValidHexColor(color) {
+      return color.matches('^#([4-9a-fA-F][0-9a-fA-F]|[a-eA-E][0-9a-fA-F]){3}$');
+    }
+
+    function isValidColor(color) {
+      return color in ['yellow', 'green', 'blue', 'purple', 'pink', 'orange', 'teal', 'slate'] || isValidHexColor(color);
+    }
+
+    function isValidType(type) {
+      return type in ['note', 'title', 'reminder'];
+    }
+
+    function isValidTitleSize(size) {
+      return size in ['small', 'medium', 'large'];
+    }
+
+    // Reminder is a nested map with optional epoch-ms timestamps.
+    // Mirrors utils/reminders.ts: no undefined keys, positive numbers, start <= due.
+    function isValidReminder(reminder) {
+      return reminder is map &&
+        reminder.keys().hasOnly(['start', 'due']) &&
+        ('due' in reminder) &&
+        isValidNumber(reminder.due) &&
+        reminder.due > 0 &&
+        (!('start' in reminder) ||
+          (isValidNumber(reminder.start) &&
+            reminder.start > 0 &&
+            reminder.start <= reminder.due));
+    }
+
+    function isValidColumnPayload(data) {
+      return data.keys().hasOnly([
+        'id',
+        'title',
+        'icon',
+        'x',
+        'y',
+        'zIndex',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.id is string &&
+      data.id.size() > 0 &&
+      data.id.size() <= 120 &&
+      data.title is string &&
+      data.title.size() <= 180 &&
+      (!('icon' in data) || data.icon is string || data.icon == null) &&
+      isValidNumber(data.x) &&
+      isValidNumber(data.y) &&
+      isValidNumber(data.zIndex) &&
+      isValidNumber(data.createdAt) &&
+      (!('updatedAt' in data) || isValidNumber(data.updatedAt));
+    }
+
+    function isMatchedPair(userA, userB) {
+      return isSignedIn() &&
+        userData(userA).matchStatus == 'matched' &&
+        userData(userA).matchPartnerId == userB &&
+        userData(userB).matchStatus == 'matched' &&
+        userData(userB).matchPartnerId == userA;
+    }
+
+    function isValidLetterSealIcon(icon) {
+      return icon in ['heart', 'star', 'sparkles', 'flower', 'moon', 'sun', 'feather', 'gem'];
+    }
+
+    function isValidLetterPayload(data, userId, letterId) {
+      return data.keys().hasOnly([
+        'id',
+        'fromUid',
+        'toUid',
+        'sealIcon',
+        'message',
+        'createdAt',
+        'expiresAt'
+      ]) &&
+      data.id is string &&
+      data.id.size() > 0 &&
+      data.id.size() <= 120 &&
+      data.id == letterId &&
+      data.fromUid is string &&
+      data.fromUid == request.auth.uid &&
+      data.toUid is string &&
+      data.toUid == userId &&
+      data.sealIcon is string &&
+      isValidLetterSealIcon(data.sealIcon) &&
+      data.message is string &&
+      data.message.size() > 0 &&
+      data.message.size() <= 2000 &&
+      data.createdAt is timestamp &&
+      data.createdAt == request.time &&
+      data.expiresAt is timestamp &&
+      data.expiresAt > request.time &&
+      data.expiresAt <= request.time + duration.value(24, 'h');
+    }
+
+    function isValidAvatarId(id) {
+      return id in ['fox', 'cat', 'panda', 'tiger', 'koala', 'rabbit', 'owl', 'bear'];
+    }
+
+    function validNotePayload(data) {
+      return data.keys().hasOnly([
+        'id',
+        'type',
+        'title',
+        'content',
+        'color',
+        'rating',
+        'icon',
+        'titleSize',
+        'reminder',
+        'columnId',
+        'order',
+        'x',
+        'y',
+        'zIndex',
+        'rotation',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.id is string &&
+      data.id.size() > 0 &&
+      data.id.size() <= 120 &&
+      data.type is string &&
+      isValidType(data.type) &&
+      data.title is string &&
+      data.title.size() <= 180 &&
+      data.content is string &&
+      data.content.size() <= 20000 &&
+      data.color is string &&
+      isValidColor(data.color) &&
+      isValidNumber(data.rating) &&
+      data.rating >= 0 &&
+      data.rating <= 5 &&
+      isValidNumber(data.x) &&
+      isValidNumber(data.y) &&
+      isValidNumber(data.zIndex) &&
+      isValidNumber(data.rotation) &&
+      data.createdAt is int &&
+      (!('updatedAt' in data) || data.updatedAt is int) &&
+      (!('columnId' in data) || data.columnId is string) &&
+      (!('order' in data) || isValidNumber(data.order)) &&
+      (!('icon' in data) || data.icon is string) &&
+      (!('titleSize' in data) || (data.titleSize is string && isValidTitleSize(data.titleSize))) &&
+      (!('reminder' in data) || isValidReminder(data.reminder));
+    }
+
+    function validUserPayload(data) {
+      return data.keys().hasOnly([
+        'uid',
+        'email',
+        'displayName',
+        'photoURL',
+        'avatarId',
+        'matchCode',
+        'matchStatus',
+        'matchPartnerId',
+        'matchPartnerName',
+        'matchPartnerPhoto',
+        'matchPartnerAvatarId',
+        'noteColorPreference',
+        'titleColorPreference',
+        'matchRequestFrom',
+        'isBanned',
+        'banReason',
+        // Legacy fields kept temporarily for migration compatibility.
+        'permission',
+        'adminPassword'
+      ]) &&
+      data.uid is string &&
+      data.email is string &&
+      data.displayName is string &&
+      data.photoURL is string &&
+      (!('avatarId' in data) || (data.avatarId is string && isValidAvatarId(data.avatarId))) &&
+      data.matchCode is string &&
+      data.matchCode.size() == 5 &&
+      data.matchStatus in ['none', 'pending_sent', 'pending_received', 'matched'] &&
+      (!('matchPartnerId' in data) || data.matchPartnerId is string || data.matchPartnerId == null) &&
+      (!('matchPartnerName' in data) || data.matchPartnerName is string || data.matchPartnerName == null) &&
+      (!('matchPartnerPhoto' in data) || data.matchPartnerPhoto is string || data.matchPartnerPhoto == null) &&
+      (!('matchPartnerAvatarId' in data) || (data.matchPartnerAvatarId is string && isValidAvatarId(data.matchPartnerAvatarId)) || data.matchPartnerAvatarId == null) &&
+      (!('noteColorPreference' in data) || (data.noteColorPreference is string && isValidColor(data.noteColorPreference))) &&
+      (!('titleColorPreference' in data) || (data.titleColorPreference is string && isValidColor(data.titleColorPreference))) &&
+      (!('matchRequestFrom' in data) || data.matchRequestFrom is string || data.matchRequestFrom == null) &&
+      (!('isBanned' in data) || data.isBanned is bool) &&
+      (!('banReason' in data) || data.banReason is string || data.banReason == null) &&
+      (!('permission' in data) || (data.permission is int && data.permission in [0, 1])) &&
+      (!('adminPassword' in data) || data.adminPassword is string || data.adminPassword == null);
+    }
+
+    function bannedFlag(data) {
+      return ('isBanned' in data) ? data.isBanned : false;
+    }
+
+    function banReasonValue(data) {
+      return ('banReason' in data) ? data.banReason : null;
+    }
+
+    function ownerCanCreateUser(userId, data) {
+      return validUserPayload(data) &&
+        data.uid == userId &&
+        bannedFlag(data) == false &&
+        banReasonValue(data) == null &&
+        (!('permission' in data) || data.permission == 0) &&
+        (!('adminPassword' in data) || data.adminPassword == null);
+    }
+
+    function ownerCanUpdateUser(userId, data, previous) {
+      return validUserPayload(data) &&
+        data.uid == userId &&
+        data.uid == previous.uid &&
+        data.email == previous.email &&
+        bannedFlag(previous) == false &&
+        bannedFlag(data) == bannedFlag(previous) &&
+        banReasonValue(data) == banReasonValue(previous) &&
+        ((!('permission' in previous) && !('permission' in data)) || (('permission' in previous) && ('permission' in data) && data.permission == previous.permission)) &&
+        ((!('adminPassword' in previous) && !('adminPassword' in data)) || (('adminPassword' in previous) && ('adminPassword' in data) && data.adminPassword == previous.adminPassword));
+    }
+
+    function matchOnlyUpdate(data, previous) {
+      return validUserPayload(data) &&
+        data.diff(previous).affectedKeys().hasOnly([
+          'matchStatus',
+          'matchRequestFrom',
+          'matchPartnerId',
+          'matchPartnerName',
+          'matchPartnerPhoto',
+          'matchPartnerAvatarId'
+        ]);
+    }
+
+    match /users/{userId} {
+      // Needed for match-code discovery in current client flow.
+      allow read: if isSignedIn();
+
+      allow create: if (isOwner(userId) && ownerCanCreateUser(userId, request.resource.data)) ||
+        (isAdmin() && validUserPayload(request.resource.data));
+
+      allow update: if (isAdmin() && validUserPayload(request.resource.data)) ||
+        (isOwner(userId) && ownerCanUpdateUser(userId, request.resource.data, resource.data)) ||
+        (isSignedIn() && isMatchInvolved(userId) && matchOnlyUpdate(request.resource.data, resource.data));
+
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId}/notes/{noteId} {
+      allow read: if isAdmin() || isOwner(userId) ||
+        (isSignedIn() &&
+          userData(userId).matchPartnerId == request.auth.uid &&
+          userData(userId).matchStatus == 'matched');
+
+      allow create, update: if (isAdmin() || isOwner(userId)) && validNotePayload(request.resource.data);
+      allow delete: if isAdmin() || isOwner(userId);
+    }
+
+    match /users/{userId}/columns/{columnId} {
+      allow read: if isAdmin() || isOwner(userId) ||
+        (isSignedIn() &&
+          userData(userId).matchPartnerId == request.auth.uid &&
+          userData(userId).matchStatus == 'matched');
+      allow create, update: if (isAdmin() || isOwner(userId)) && isValidColumnPayload(request.resource.data);
+      allow delete: if isAdmin() || isOwner(userId);
+    }
+
+    match /users/{userId}/letters/{letterId} {
+      allow read: if isAdmin() || isOwner(userId);
+      allow create: if isValidLetterPayload(request.resource.data, userId, letterId) &&
+        (isAdmin() || (isSignedIn() && isMatchedPair(request.auth.uid, userId)));
+      allow update: if false;
+      allow delete: if isAdmin() || isOwner(userId);
+    }
+  }
+}

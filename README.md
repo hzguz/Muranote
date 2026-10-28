@@ -1,102 +1,46 @@
 # Muranote
 
-Muranote is a sticky-note wall built with React, Vite, and Firebase. It combines a freeform canvas with column-based organization, local-first persistence, Google sign-in, and shared features such as match-based collaboration and ephemeral letters.
+A sticky-note wall for your thoughts: drop notes anywhere on a freeform canvas, group them into columns, add reminders, and sync across devices with your Google account.
 
-## Highlights
+**Live:** [muranote.vercel.app](https://muranote.vercel.app)
 
-- Freeform note wall with drag, resize, layering, and rotation support
-- Column mode for structured organization alongside the open canvas
-- Local-first behavior with `localStorage` fallback
-- Firebase Authentication with Google sign-in
-- Firestore sync for notes, columns, user profiles, and letters
-- Match system that connects two users through a 5-digit code
-- Ephemeral letters with automatic expiration
-- Admin tools for moderation, user lookup, admin letters, and claim management
-- Local backup export and restore
-- Built-in tracked-secret audit script
+## Features
 
-## Tech Stack
+- **Freeform canvas**: drag, resize, rotate and layer notes and title cards
+- **Columns**: create, rename and reorder columns, and drag notes in and out
+- **Reminders**: due date with upcoming/today/overdue status
+- **Colors and star ratings** per note
+- **Local-first**: works signed-out with `localStorage`. Sign in with Google to sync to Firestore.
+- **Online/offline indicator**
+- **Match**: connect with one other person through a 5-digit code and view their wall read-only
+- **Letters**: short sealed messages to your match that expire automatically
+- **Backup**: export and restore your notes as JSON
+- **Admin tools** (custom claim): user list, ban/unban, match reset, broadcast letters
+- Note content is sanitized with DOMPurify before rendering and saving
 
-- React 19
-- TypeScript
-- Vite
-- Firebase Auth
-- Firestore
-- Framer Motion
-- Tailwind CSS
+## Tech stack
 
-## Core Features
+| Layer | Technology |
+| --- | --- |
+| UI | React 19 + TypeScript |
+| Build | Vite 6 |
+| Auth / database | Firebase Authentication (Google), Cloud Firestore |
+| Animation | Framer Motion |
+| Styling | Tailwind CSS |
+| Icons | Lucide, Tabler Icons |
+| Hosting | Vercel (static SPA) |
 
-### Notes and Canvas
+## Getting started
 
-- Create note cards and title cards
-- Move notes freely on the canvas
-- Bring notes and columns to the front with z-index management
-- Edit note content in a dedicated editor
-- Apply color themes and star ratings
-- Sanitize note content before persistence
+Requirements: Node.js 20+, Yarn, and a Firebase project with **Google sign-in** and **Firestore** enabled.
 
-### Columns
-
-- Create, rename, move, and delete columns
-- Drag notes into columns
-- Keep unassigned notes on the free canvas
-- Preserve column state locally and in Firestore
-
-### Accounts and Sync
-
-- Sign in with Google through Firebase Auth
-- Create a profile automatically on first login
-- Sync notes and columns per user
-- Fall back to local storage when cloud data is unavailable
-- Show online/offline state in the UI
-
-### Match and Social Features
-
-- Generate a unique 5-digit match code per user
-- Send, accept, decline, and undo match requests
-- View a matched partner's notes in read-only mode
-- Send short sealed letters to a matched partner
-- Auto-clean expired letters
-
-### Admin Tools
-
-- Paginated user listing
-- Ban and unban users
-- Reset user match state
-- Send letters as admin
-- Promote or demote admins using a local script and a Firebase service account
-
-## Project Structure
-
-```text
-.
-|-- components/          UI building blocks
-|-- contexts/            React context providers
-|-- docs/                deployment and operational notes
-|-- hooks/               reusable React hooks
-|-- public/              static assets and sounds
-|-- scripts/             maintenance and security scripts
-|-- services/            Firebase and persistence layer
-|-- utils/               sanitization, audio, avatar, and helper logic
-|-- App.tsx              main application shell and orchestration
-|-- index.tsx            React entrypoint
-|-- index.html           HTML shell
-|-- vite.config.ts       Vite configuration
-|-- vercel.json          SPA rewrite configuration for Vercel
+```bash
+yarn install
+cp .env.example .env    # fill in your Firebase web app config
+yarn dev
 ```
 
-## Requirements
-
-- Node.js 20+ recommended
-- Yarn
-- A Firebase project with:
-  - Google Authentication enabled
-  - Firestore enabled
-
-## Environment Variables
-
-Copy `.env.example` to `.env` and fill in your Firebase web app configuration:
+`.env` variables (Firebase web config; these are exposed to the client by design):
 
 ```env
 VITE_FIREBASE_API_KEY=
@@ -106,113 +50,71 @@ VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
 VITE_FIREBASE_MEASUREMENT_ID=
-```
-
-Optional:
-
-```env
+# optional
 VITE_APP_BASE=/
 ```
 
-Notes:
+Production builds fail if the required `VITE_FIREBASE_*` values are missing.
 
-- Production builds fail if the required `VITE_FIREBASE_*` variables are missing.
-- Values prefixed with `VITE_` are exposed to the client bundle by design.
-- Do not place service account JSON files, private keys, or server-side secrets in `.env` files intended for the frontend.
+| Script | What it does |
+| --- | --- |
+| `yarn dev` | Start the Vite dev server |
+| `yarn build` / `yarn preview` | Production build / preview it locally |
+| `yarn typecheck` | TypeScript check without emitting |
+| `yarn check:unused` | Report unused locals and parameters |
+| `yarn security:secrets` | Scan tracked files for leaked secrets |
+| `yarn security:audit` | Dependency vulnerability audit |
+| `yarn check:prepublish` | All of the above in sequence |
+| `yarn admin:claim <UID> <true\|false> --confirm` | Grant or revoke the admin claim (needs a service account via `GOOGLE_APPLICATION_CREDENTIALS`) |
 
-## Getting Started
+### Firestore security rules
 
-Install dependencies:
-
-```bash
-yarn install
-```
-
-Start the development server:
-
-```bash
-yarn dev
-```
-
-Create a production build:
+[`firestore.rules`](firestore.rules) restricts each `users/{uid}` subtree to its owner, gives a matched partner read-only access to notes and columns, validates every payload, and reserves moderation fields for admins (custom claim). Deploy them with:
 
 ```bash
-yarn build
+firebase deploy --only firestore:rules
 ```
-
-Preview the production build locally:
-
-```bash
-yarn preview
-```
-
-## Available Scripts
-
-- `yarn dev` starts Vite in development mode
-- `yarn build` creates a production build
-- `yarn preview` previews the built app
-- `yarn typecheck` runs TypeScript without emitting files
-- `yarn check:unused` checks for unused locals and parameters
-- `yarn security:secrets` scans tracked files for obvious secret leaks
-- `yarn security:audit` runs a dependency security audit
-- `yarn security:audit:all` runs the full audit available in Yarn
-- `yarn check:prepublish` runs the main quality and security checks
-- `yarn admin:claim -- <UID> <true|false> --confirm` updates Firebase custom admin claims
-
-## Admin Claim Script
-
-The admin claim utility reads a Firebase service account from one of these environment variables:
-
-- `GOOGLE_APPLICATION_CREDENTIALS`
-- `FIREBASE_SERVICE_ACCOUNT_PATH`
-
-Example:
-
-```bash
-yarn admin:claim some-user-uid true --confirm
-```
-
-Important:
-
-- The service account file must stay out of Git.
-- The script writes an audit log to `scripts/admin-claim-audit.log` when possible.
-- Users must sign out and back in after a claim change so Firebase refreshes their token.
-
-## Data Model Summary
-
-Main persisted entities:
-
-- `users/{uid}` for profile, match state, avatar, preferences, and moderation flags
-- `users/{uid}/notes/{noteId}` for notes and title cards
-- `users/{uid}/columns/{columnId}` for board columns
-- `users/{uid}/letters/{letterId}` for expiring letters
-
-## Security Notes
-
-- Frontend note content is sanitized before rendering and persistence.
-- The repository includes a tracked-file secret scan in `scripts/checkTrackedSecrets.mjs`.
-- `.gitignore` excludes `.env`, service account files, Vercel local state, and other sensitive artifacts.
-- If a secret was ever committed or deployed, rotate it first. Removing it from the current working tree is not enough.
 
 ## Deployment
 
-This app is configured for Vercel as a static SPA with Firebase as the backend.
+1. Import the repo into Vercel and set the `VITE_FIREBASE_*` variables.
+2. Add your production domain to Firebase Auth → Authorized domains.
+3. Deploy. `vercel.json` rewrites all routes to `index.html`.
 
-Basic production flow:
+## Data model
 
-1. Import the repository into Vercel.
-2. Set the required `VITE_FIREBASE_*` environment variables.
-3. Ensure Google Auth authorized domains include your production domain.
-4. Deploy the app.
+| Path | Content |
+| --- | --- |
+| `users/{uid}` | Profile, avatar, match state, preferences, moderation flags |
+| `users/{uid}/notes/{noteId}` | Notes and title cards |
+| `users/{uid}/columns/{columnId}` | Columns |
+| `users/{uid}/letters/{letterId}` | Expiring letters |
 
-The SPA rewrite is configured in `vercel.json` so nested routes resolve to `index.html`.
+## Privacy
 
-For the existing deployment notes, see [docs/deploy-vercel-firebase.md](./docs/deploy-vercel-firebase.md).
+Signed-in data lives in Firestore under your user ID. Your matched partner can read your notes and columns. Accounts with the admin claim can view any user's wall for moderation purposes, as enforced by `firestore.rules`.
 
-## Known Operational Caveat
+## Project structure
 
-`scripts/checkTrackedSecrets.mjs` currently self-matches one of its own detection patterns, which can create a false positive when running `yarn security:secrets`. Treat that script result carefully until the scanner exclusion logic is adjusted.
+```text
+App.tsx               App shell: canvas, columns, sync orchestration
+components/           Note, NoteEditor, columns, letters, admin panel, modals
+contexts/             Language provider
+hooks/                useOnlineStatus
+services/firebase.ts  Auth, Firestore reads/writes, match and letters
+utils/                Sanitization, reminders, colors, avatars, audio
+scripts/              Admin-claim and tracked-secret scan scripts
+public/               Favicon, logo and notification sounds
+firestore.rules       Firestore security rules
+```
 
-## Maintenance Reset
+## License
 
-If you need to wipe repository history and old deployments after an accidental secret exposure, use the playbook in [docs/reset-history-and-deployments.md](./docs/reset-history-and-deployments.md).
+[MIT](LICENSE)
+
+## Author
+
+**Gustavo Soares**, designer and front-end developer at **GsStudio**
+
+- Portfolio: [gustasoares.com](https://gustasoares.com)
+- GitHub: [@hzguz](https://github.com/hzguz)

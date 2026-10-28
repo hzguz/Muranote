@@ -28,8 +28,8 @@ const writeAuditLog = (entry) => {
 };
 
 if (!uid || !valueArg || !['true', 'false'].includes(valueArg) || !isValidUid) {
-  console.error('Uso: yarn admin:claim <UID> <true|false> --confirm');
-  console.error('Regras: UID sem espacos e com no maximo 128 caracteres.');
+  console.error('Usage: yarn admin:claim <UID> <true|false> --confirm');
+  console.error('Rules: UID must have no spaces and at most 128 characters.');
   writeAuditLog({
     action: 'setCustomUserClaims',
     uid: uid || null,
@@ -43,8 +43,8 @@ if (!uid || !valueArg || !['true', 'false'].includes(valueArg) || !isValidUid) {
 const isAdmin = valueArg === 'true';
 
 if (!hasConfirmFlag) {
-  console.error('Confirmacao obrigatoria ausente.');
-  console.error('Repita com: yarn admin:claim <UID> <true|false> --confirm');
+  console.error('Missing required confirmation.');
+  console.error('Run again with: yarn admin:claim <UID> <true|false> --confirm');
   writeAuditLog({
     action: 'setCustomUserClaims',
     uid,
@@ -57,7 +57,7 @@ if (!hasConfirmFlag) {
 
 const keyPathArg = process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 if (!keyPathArg) {
-  console.error('Defina GOOGLE_APPLICATION_CREDENTIALS ou FIREBASE_SERVICE_ACCOUNT_PATH apontando para o JSON da service account.');
+  console.error('Set GOOGLE_APPLICATION_CREDENTIALS or FIREBASE_SERVICE_ACCOUNT_PATH to the service account JSON file.');
   writeAuditLog({
     action: 'setCustomUserClaims',
     uid,
@@ -70,7 +70,7 @@ if (!keyPathArg) {
 
 const resolvedKeyPath = path.resolve(process.cwd(), keyPathArg);
 if (!fs.existsSync(resolvedKeyPath)) {
-  console.error(`Arquivo de credencial não encontrado: ${resolvedKeyPath}`);
+  console.error(`Credentials file not found: ${resolvedKeyPath}`);
   writeAuditLog({
     action: 'setCustomUserClaims',
     uid,
@@ -83,7 +83,7 @@ if (!fs.existsSync(resolvedKeyPath)) {
 }
 
 if (path.extname(resolvedKeyPath).toLowerCase() !== '.json') {
-  console.error('Credencial invalida: o arquivo precisa ser .json.');
+  console.error('Invalid credentials: the file must be .json.');
   writeAuditLog({
     action: 'setCustomUserClaims',
     uid,
@@ -101,7 +101,7 @@ try {
   const serviceAccountRaw = fs.readFileSync(resolvedKeyPath, 'utf8');
   serviceAccount = JSON.parse(serviceAccountRaw);
 } catch {
-  console.error('Falha ao ler ou interpretar o JSON da service account.');
+  console.error('Failed to read or parse the service account JSON.');
   writeAuditLog({
     action: 'setCustomUserClaims',
     uid,
@@ -119,7 +119,7 @@ if (
   typeof serviceAccount.client_email !== 'string' ||
   typeof serviceAccount.private_key !== 'string'
 ) {
-  console.error('Service account invalida: faltam campos obrigatorios (project_id, client_email, private_key).');
+  console.error('Invalid service account: missing required fields (project_id, client_email, private_key).');
   writeAuditLog({
     action: 'setCustomUserClaims',
     uid,
@@ -131,8 +131,8 @@ if (
   process.exit(1);
 }
 
-console.log(`[admin:claim] Confirmado: uid=${uid} admin=${isAdmin}`);
-console.log(`[admin:claim] Operador local: ${operator}`);
+console.log(`[admin:claim] Confirmed: uid=${uid} admin=${isAdmin}`);
+console.log(`[admin:claim] Local operator: ${operator}`);
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -143,8 +143,8 @@ if (!admin.apps.length) {
 try {
   await admin.auth().setCustomUserClaims(uid, { admin: isAdmin });
   await admin.auth().revokeRefreshTokens(uid);
-  console.log(`Claim atualizado com sucesso: uid=${uid} admin=${isAdmin}`);
-  console.log('Peça para o usuário fazer logout/login para renovar o token.');
+  console.log(`Claim updated successfully: uid=${uid} admin=${isAdmin}`);
+  console.log('Ask the user to sign out and back in to refresh their token.');
   writeAuditLog({
     action: 'setCustomUserClaims',
     uid,
@@ -152,7 +152,7 @@ try {
     status: 'success',
   });
 } catch (error) {
-  console.error('Falha ao atualizar claim:', error);
+  console.error('Failed to update claim:', error);
   writeAuditLog({
     action: 'setCustomUserClaims',
     uid,

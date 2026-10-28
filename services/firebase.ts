@@ -194,8 +194,23 @@ export const getUsersPaginated = async (lastDoc: DocumentSnapshot | null, pageSi
   return { users, lastVisible };
 };
 
+const MATCH_CODE_MAX_ATTEMPTS = 5;
+
 const generateMatchCode = () => {
   return Math.floor(10000 + Math.random() * 90000).toString();
+};
+
+// Match codes are looked up by value, so a duplicate would route requests to the wrong user.
+// Sequential attempts are intentional: each one depends on the previous lookup missing.
+const generateUniqueMatchCode = async (database: Firestore): Promise<string> => {
+  for (let attempt = 0; attempt < MATCH_CODE_MAX_ATTEMPTS; attempt++) {
+    const candidate = generateMatchCode();
+    const existing = await getDocs(
+      query(collection(database, 'users'), where('matchCode', '==', candidate), limit(1))
+    );
+    if (existing.empty) return candidate;
+  }
+  throw new Error('Could not generate a unique match code.');
 };
 
 export const initializeUserProfile = async (user: User) => {
@@ -213,7 +228,7 @@ export const initializeUserProfile = async (user: User) => {
       avatarId: defaultAvatar,
       noteColorPreference: DEFAULT_TYPE_COLORS.note,
       titleColorPreference: DEFAULT_TYPE_COLORS.title,
-      matchCode: generateMatchCode(),
+      matchCode: await generateUniqueMatchCode(database),
       matchStatus: 'none',
     };
     await setDoc(userRef, profile);
@@ -222,7 +237,7 @@ export const initializeUserProfile = async (user: User) => {
     const updates: Record<string, any> = {};
     const safeNotePref = sanitizeNoteColor(data.noteColorPreference, DEFAULT_TYPE_COLORS.note);
     const safeTitlePref = sanitizeNoteColor(data.titleColorPreference, DEFAULT_TYPE_COLORS.title);
-    if (!data.matchCode) updates.matchCode = generateMatchCode();
+    if (!data.matchCode) updates.matchCode = await generateUniqueMatchCode(database);
     if (!isAvatarId(data.avatarId)) updates.avatarId = defaultAvatar;
     if (data.noteColorPreference !== safeNotePref) updates.noteColorPreference = safeNotePref;
     if (data.titleColorPreference !== safeTitlePref) updates.titleColorPreference = safeTitlePref;

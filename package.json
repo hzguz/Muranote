@@ -1,7 +1,21 @@
 {
   "name": "muranote",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Local-first sticky-note wall with columns, reminders and Firestore sync.",
+  "license": "MIT",
+  "author": {
+    "name": "Gustavo Soares",
+    "url": "https://gustasoares.com"
+  },
+  "homepage": "https://muranote.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hzguz/Muranote.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hzguz/Muranote/issues"
+  },
   "type": "module",
   "packageManager": "yarn@1.22.22",
   "scripts": {
@@ -17,7 +31,6 @@
     "check:prepublish": "yarn typecheck && yarn build && yarn check:unused && yarn security:secrets && yarn security:audit"
   },
   "dependencies": {
-    "@types/dompurify": "^3.0.5",
     "dompurify": "^3.3.1",
     "firebase": "^12.6.0",
     "framer-motion": "^12.23.26",
