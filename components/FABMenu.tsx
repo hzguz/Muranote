@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, FilePlus, LayoutColumns, EyeOff, CalendarPlus } from 'tabler-icons-react';
-import { MailPlus } from 'lucide-react';
+import { CalendarPlus, Columns2, EyeOff, FilePlus, MailPlus, Plus } from 'lucide-react';
 import { UserProfile, NoteType, Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 import Avatar from './Avatar';
@@ -56,7 +55,7 @@ const FABMenu: React.FC<FABMenuProps> = ({
                                 {t.addCol}
                             </span>
                             <div className="bg-primary/10 p-2 rounded-full text-primary">
-                                <LayoutColumns size={20} strokeWidth={currentStroke} />
+                                <Columns2 size={20} strokeWidth={currentStroke} />
                             </div>
                         </button>
                         <button

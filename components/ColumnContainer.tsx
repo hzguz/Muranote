@@ -1,14 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, AnimatePresence, PanInfo } from 'framer-motion';
-import { X, Plus, Pencil, Lock, Book, Book2, Notebook, Quote, Bookmark, Typography, Search, Bulb, Heart, LayoutColumns, Star } from 'tabler-icons-react';
-import { Grid2x2, Grid3x3 } from 'lucide-react';
+import { Columns2, Grid2x2, Grid3x3, Lock, Plus, X } from 'lucide-react';
+import { TITLE_ICON_MAP } from './icons/titleIconMap';
 import { ColumnData, NoteData, Language } from '../types';
 import { TRANSLATIONS, TITLE_ICONS } from '../constants';
 
-// Icon map for dynamic rendering
-const IconMap: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
-    Book, Book2, Notebook, Quote, Star, Pencil, Bookmark, Typography, Search, Bulb, Heart, LayoutColumns
-};
 
 interface ColumnContainerProps {
     column: ColumnData;
@@ -65,7 +61,7 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
     }, [isPickingIcon]);
 
     // Get the current icon component
-    const CurrentIcon = column.icon ? IconMap[column.icon] : LayoutColumns;
+    const CurrentIcon = column.icon ? TITLE_ICON_MAP[column.icon] : Columns2;
 
     const x = useMotionValue(column.x);
     const y = useMotionValue(column.y);
@@ -133,7 +129,7 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
                                     >
                                         <div className="grid grid-cols-5 gap-2">
                                             {TITLE_ICONS.map((iconName) => {
-                                                const Icon = IconMap[iconName];
+                                                const Icon = TITLE_ICON_MAP[iconName];
                                                 return (
                                                     <button
                                                         key={iconName}
@@ -244,7 +240,7 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
                                 >
                                     <div className="grid grid-cols-5 gap-2">
                                         {TITLE_ICONS.map((iconName) => {
-                                            const Icon = IconMap[iconName];
+                                            const Icon = TITLE_ICON_MAP[iconName];
                                             return (
                                                 <button
                                                     key={iconName}

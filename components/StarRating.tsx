@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Heart } from 'tabler-icons-react';
+import { Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface StarRatingProps {

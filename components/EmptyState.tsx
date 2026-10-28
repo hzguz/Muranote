@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Wand } from 'tabler-icons-react';
+import { Heart, Wand } from 'lucide-react';
 import { Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 

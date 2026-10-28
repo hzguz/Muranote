@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'tabler-icons-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DatePickerProps {
   /** Selected date (epoch ms) or null. */

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, X } from 'tabler-icons-react';
+import { TriangleAlert, X } from 'lucide-react';
 
 interface ConfirmModalProps {
     isOpen: boolean;
@@ -66,7 +66,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                         {/* Header */}
                         <div className="p-5 pb-0 flex items-start gap-4">
                             <div className={`p-3 rounded-full ${styles.iconBg}`}>
-                                <AlertTriangle size={24} strokeWidth={stroke} className={styles.icon} />
+                                <TriangleAlert size={24} strokeWidth={stroke} className={styles.icon} />
                             </div>
                             <div className="flex-1 pt-1">
                                 <h3 className="text-lg font-bold text-gray-900 lowercase">{title}</h3>

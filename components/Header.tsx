@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Login, User, Bulb, ShieldCheck } from 'tabler-icons-react';
+import { Lightbulb, LogIn, ShieldCheck, User, X } from 'lucide-react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { UserProfile, Language } from '../types';
 import { TRANSLATIONS } from '../constants';
@@ -141,7 +141,7 @@ const Header: React.FC<HeaderProps> = ({
                             className={`w-11 h-11 flex items-center justify-center rounded-full transition-all ${readingFilterIntensity > 0 ? 'bg-yellow-400/30 text-yellow-300' : 'bg-black/10 text-white/60 hover:text-white/90 hover:bg-black/20'}`}
                             title={t.readingFilter}
                         >
-                            <Bulb
+                            <Lightbulb
                                 size={18}
                                 strokeWidth={currentStroke}
                                 fill={readingFilterIntensity > 0 ? 'currentColor' : 'none'}
@@ -204,7 +204,7 @@ const Header: React.FC<HeaderProps> = ({
                         onClick={onOpenDataModal}
                         className="px-4 py-2 text-primary bg-white rounded-full font-bold text-xs md:text-sm flex items-center gap-2 shadow-xs lowercase hover:bg-gray-50 transition-colors"
                     >
-                        <Login size={18} strokeWidth={currentStroke} />
+                        <LogIn size={18} strokeWidth={currentStroke} />
                         <span className="inline leading-none pt-[1px]">{t.signIn}</span>
                     </motion.button>
                 )}

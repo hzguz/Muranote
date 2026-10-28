@@ -1,7 +1,20 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { X, Trash, Book, Book2, Notebook, Quote, Pencil, Bookmark, Typography, Search, Bulb, Heart, Circle, Bold, Italic, Underline, ChevronDown, Lock, FolderPlus, Palette, CalendarEvent } from 'tabler-icons-react';
+import {
+  Bold,
+  CalendarDays,
+  ChevronDown,
+  Circle,
+  FolderPlus,
+  Italic,
+  Lock,
+  Palette,
+  Trash2,
+  Underline,
+  X,
+} from 'lucide-react';
+import { TITLE_ICON_MAP } from './icons/titleIconMap';
 import { NoteData, Language } from '../types';
 import { COLORS, COLOR_KEYS, TITLE_ICONS, TITLE_SIZE_CLASSES, TRANSLATIONS } from '../constants';
 import StarRating from './StarRating';
@@ -21,9 +34,6 @@ interface NoteEditorProps {
   readOnly?: boolean;
 }
 
-const IconMap: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number; fill?: string; color?: string }>> = {
-  Book, Book2, Notebook, Quote, Pencil, Bookmark, Typography, Search, Bulb, Heart, Circle
-};
 
 const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, onDelete, stroke, lang = 'en', readOnly = false }) => {
   const t = TRANSLATIONS[lang];
@@ -943,7 +953,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                       <div className="border-[1px] border-black/10 rounded-2xl p-3 md:p-4 bg-white/10">
                         <div className="grid grid-cols-5 gap-2 md:gap-3">
                           {TITLE_ICONS.map((iconName) => {
-                            const IconComp = IconMap[iconName] || Circle;
+                            const IconComp = TITLE_ICON_MAP[iconName] || Circle;
                             const isSelected = editedNote.icon === iconName;
                             if (readOnly && !isSelected) return null;
                             return (
@@ -980,7 +990,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                         className={`flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/15 bg-black/5 text-xs md:text-sm font-semibold lowercase transition-all ${readOnly ? 'opacity-60' : 'hover:bg-black/10'}`}
                         style={{ color: text }}
                       >
-                        <CalendarEvent size={isMobile ? 16 : 15} strokeWidth={2.2} />
+                        <CalendarDays size={isMobile ? 16 : 15} strokeWidth={2.2} />
                         <span>{reminderLabel || t.reminderNone}</span>
                         <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform ${isDatePickerOpen ? 'rotate-180' : ''}`} />
                       </button>
@@ -997,7 +1007,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                           </div>
                         </motion.div>
                       ) : (
-                        <motion.button whileHover={{ scale: 1.1, backgroundColor: "rgba(0,0,0,0.05)" }} whileTap={{ scale: 0.9 }} onClick={handleDelete} className="p-2 md:p-3 text-current opacity-60 hover:opacity-100 rounded-2xl transition-all"><Trash size={24} strokeWidth={stroke} /></motion.button>
+                        <motion.button whileHover={{ scale: 1.1, backgroundColor: "rgba(0,0,0,0.05)" }} whileTap={{ scale: 0.9 }} onClick={handleDelete} className="p-2 md:p-3 text-current opacity-60 hover:opacity-100 rounded-2xl transition-all"><Trash2 size={24} strokeWidth={stroke} /></motion.button>
                       )}
                     </div>
                   )}

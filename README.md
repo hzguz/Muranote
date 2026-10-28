@@ -27,7 +27,7 @@ A sticky-note wall for your thoughts: drop notes anywhere on a freeform canvas, 
 | Auth / database | Firebase Authentication (Google), Cloud Firestore |
 | Animation | Framer Motion |
 | Styling | Tailwind CSS |
-| Icons | Lucide, Tabler Icons |
+| Icons | Lucide |
 | Hosting | Vercel (static SPA) |
 
 ## Getting started

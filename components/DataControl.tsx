@@ -1,6 +1,18 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Upload, X, AlertTriangle, Check, User as UserIcon, Logout, Heart, Copy, Link, UserPlus } from 'tabler-icons-react';
+import {
+  Check,
+  Copy,
+  Download,
+  Heart,
+  Link,
+  LogOut,
+  TriangleAlert,
+  Upload,
+  User as UserIcon,
+  UserPlus,
+  X,
+} from 'lucide-react';
 import { APP_NAME, TRANSLATIONS } from '../constants';
 import { ExportData, NoteData, UserProfile, Language } from '../types';
 import { User } from 'firebase/auth';
@@ -359,7 +371,7 @@ const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImp
                     onClick={onLogout}
                     className="w-full py-2.5 rounded-2xl border border-red-100 text-red-500 hover:bg-red-50 text-xs font-bold transition-colors flex items-center justify-center gap-2 lowercase"
                   >
-                    <Logout size={16} strokeWidth={stroke} /> {t.logout}
+                    <LogOut size={16} strokeWidth={stroke} /> {t.logout}
                   </button>
                 </div>
               ) : (
@@ -443,7 +455,7 @@ const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImp
                 exit={{ opacity: 0, x: 20, y: 0 }}
                 className="bg-white text-red-600 p-3 px-4 rounded-xl text-xs font-bold flex items-center gap-2 lowercase shadow-xl border-l-4 border-red-500 pointer-events-auto"
               >
-                <AlertTriangle size={18} strokeWidth={stroke} /> <span>{error}</span>
+                <TriangleAlert size={18} strokeWidth={stroke} /> <span>{error}</span>
               </motion.div>
             )}
 

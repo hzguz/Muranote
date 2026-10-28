@@ -1,7 +1,8 @@
 
 import React, { useRef, useState, useEffect, memo } from 'react';
 import { motion, useMotionValue, useTransform, useSpring, useVelocity, PanInfo, animate } from 'framer-motion';
-import { Book, Book2, Notebook, Quote, Pencil, Bookmark, Typography, Search, Bulb, Heart, Circle, Lock, CalendarEvent } from 'tabler-icons-react';
+import { Bookmark, CalendarDays, Lock } from 'lucide-react';
+import { TITLE_ICON_MAP } from './icons/titleIconMap';
 import { NoteData, Language } from '../types';
 import { TITLE_SIZE_CLASSES, TITLE_ICON_SIZES, TRANSLATIONS } from '../constants';
 import StarRating from './StarRating';
@@ -28,9 +29,6 @@ interface NoteProps {
   canvasScale?: number;
 }
 
-const IconMap: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number; fill?: string; color?: string }>> = {
-  Book, Book2, Notebook, Quote, Pencil, Bookmark, Typography, Search, Bulb, Heart, Circle
-};
 
 /**
  * Robust text extraction from HTML for preview.
@@ -243,7 +241,7 @@ const Note: React.FC<NoteProps> = ({
 
   const isTitle = note.type === 'title';
   const isReminder = note.type === 'reminder';
-  const IconComp = note.icon ? IconMap[note.icon] : Bookmark;
+  const IconComp = note.icon ? TITLE_ICON_MAP[note.icon] : Bookmark;
   const currentSizeKey = note.titleSize || 'small';
   const titleClass = isTitle ? TITLE_SIZE_CLASSES[currentSizeKey] : '';
   const iconSize = isTitle ? TITLE_ICON_SIZES[currentSizeKey] : 28;
@@ -374,7 +372,7 @@ const Note: React.FC<NoteProps> = ({
                   className={`flex items-center gap-1 min-w-0 text-[9px] md:text-[11px] font-semibold lowercase ${reminderSealClass}`}
                   style={{ color: text }}
                 >
-                  <CalendarEvent size={isMobile ? 10 : 12} strokeWidth={2.2} className="shrink-0" />
+                  <CalendarDays size={isMobile ? 10 : 12} strokeWidth={2.2} className="shrink-0" />
                   <span className="truncate">{reminderLabel || '...'}</span>
                 </span>
               )}

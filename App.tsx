@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Plus, AlertTriangle, Target, WifiOff } from 'tabler-icons-react';
+import { Plus, Target, TriangleAlert, WifiOff } from 'lucide-react';
 import { motion, AnimatePresence, LayoutGroup, useMotionValue, animate } from 'framer-motion';
 
 import Note from './components/Note';
@@ -1472,7 +1472,7 @@ function App() {
                 {authError && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 z-[60000] flex items-center justify-center p-4" onClick={() => setAuthError(null)}>
                         <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} onClick={(e) => e.stopPropagation()} className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6">
-                            <div className="flex items-center gap-3 text-red-600 mb-4"><div className="bg-red-100 p-2 rounded-full"><AlertTriangle size={24} strokeWidth={currentStroke} /></div><h3 className="text-lg font-bold text-gray-800 lowercase">{authError.title}</h3></div>
+                            <div className="flex items-center gap-3 text-red-600 mb-4"><div className="bg-red-100 p-2 rounded-full"><TriangleAlert size={24} strokeWidth={currentStroke} /></div><h3 className="text-lg font-bold text-gray-800 lowercase">{authError.title}</h3></div>
                             <p className="text-gray-600 mb-4 leading-relaxed lowercase">{authError.message}</p>
                             <div className="flex justify-end"><button onClick={() => setAuthError(null)} className="px-5 py-2.5 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-black transition-colors lowercase">got it</button></div>
                         </motion.div>
@@ -1494,7 +1494,7 @@ function App() {
                             className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 text-center"
                         >
                             <div className="w-20 h-20 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
-                                <AlertTriangle size={40} className="text-red-600" strokeWidth={1.5} />
+                                <TriangleAlert size={40} className="text-red-600" strokeWidth={1.5} />
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-2 lowercase">conta suspensa</h2>
                             <p className="text-gray-600 mb-6 leading-relaxed">

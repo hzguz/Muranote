@@ -1,6 +1,20 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, X, Database, Trash, Refresh, Check, Users, Tools, Eye, ChevronRight, Ban, Mail, Send } from 'tabler-icons-react';
+import {
+  Ban,
+  Check,
+  ChevronRight,
+  Database,
+  Eye,
+  Mail,
+  RefreshCw,
+  Send,
+  Shield,
+  Trash2,
+  Users,
+  Wrench,
+  X,
+} from 'lucide-react';
 import { User } from 'firebase/auth';
 import { DocumentSnapshot } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
@@ -230,7 +244,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose, user, notes, o
                             onClick={() => setActiveTab('tools')}
                             className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 ${activeTab === 'tools' ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-300'}`}
                         >
-                            <Tools size={16} /> {t.tools}
+                            <Wrench size={16} /> {t.tools}
                         </button>
                         <button
                             onClick={() => setActiveTab('users')}
@@ -258,11 +272,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose, user, notes, o
                                         <div className="text-left"><div className="text-sm font-bold text-gray-300">{t.genNotes}</div><div className="text-[10px] text-gray-500">Stress test grid layout</div></div>
                                     </button>
                                     <button onClick={handleResetProfile} disabled={isLoading} className="flex items-center gap-3 bg-gray-800 hover:bg-gray-700 p-3 rounded-lg border border-gray-700 transition-colors group">
-                                        <div className="bg-yellow-500/20 text-yellow-400 p-2 rounded-sm group-hover:bg-yellow-500 group-hover:text-white transition-colors"><Refresh size={18} /></div>
+                                        <div className="bg-yellow-500/20 text-yellow-400 p-2 rounded-sm group-hover:bg-yellow-500 group-hover:text-white transition-colors"><RefreshCw size={18} /></div>
                                         <div className="text-left"><div className="text-sm font-bold text-gray-300">{t.resetMatch}</div><div className="text-[10px] text-gray-500">Forçar status para 'none'</div></div>
                                     </button>
                                     <button onClick={handleNukeNotes} disabled={isLoading} className="flex items-center gap-3 bg-red-900/20 hover:bg-red-900/40 p-3 rounded-lg border border-red-900/50 transition-colors group">
-                                        <div className="bg-red-500/20 text-red-400 p-2 rounded-sm group-hover:bg-red-500 group-hover:text-white transition-colors"><Trash size={18} /></div>
+                                        <div className="bg-red-500/20 text-red-400 p-2 rounded-sm group-hover:bg-red-500 group-hover:text-white transition-colors"><Trash2 size={18} /></div>
                                         <div className="text-left"><div className="text-sm font-bold text-red-300">{t.nukeNotes}</div><div className="text-[10px] text-red-400">Limpar DB do usuário atual</div></div>
                                     </button>
                                 </div>
@@ -274,7 +288,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose, user, notes, o
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-sm font-bold text-gray-400 uppercase">{t.userList}</h3>
                                     <button onClick={() => loadUsers(true)} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1">
-                                        <Refresh size={12} /> {t.update}
+                                        <RefreshCw size={12} /> {t.update}
                                     </button>
                                 </div>
 
